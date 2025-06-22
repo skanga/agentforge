@@ -9,8 +9,6 @@ import java.util.Map;
  * Interface for managing the history of messages in a conversation.
  * Implementations can range from simple in-memory stores to persistent file-based
  * or database-backed histories.
- *
- * Corresponds to `ChatHistoryInterface.php`.
  */
 public interface ChatHistory {
 
@@ -42,7 +40,6 @@ public interface ChatHistory {
      * Removes the oldest message(s) from the history.
      * This is often used for managing context window size, though the exact
      * mechanism (e.g., how many messages to remove) can be implementation-specific.
-     * The PHP version had this as abstract, used by `cutHistoryToContextWindow`.
      */
     void removeOldestMessage();
 

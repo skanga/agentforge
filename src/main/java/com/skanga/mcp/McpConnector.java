@@ -141,7 +141,6 @@ public class McpConnector {
                 Map<String, Object> mcpResponseResult = client.callTool(name, toolExecutionInput.arguments());
 
                 // Process MCP response: extract primary textual content or serialize complex content.
-                // This part mirrors the PHP client's expectation of a "content" list.
                 if (mcpResponseResult != null && mcpResponseResult.containsKey("content")) {
                     Object contentField = mcpResponseResult.get("content");
                     if (contentField instanceof List) {

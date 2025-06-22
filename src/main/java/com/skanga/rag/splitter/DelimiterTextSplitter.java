@@ -183,9 +183,8 @@ public class DelimiterTextSplitter implements TextSplitter {
                  // Only add separator if currentChunk has content AND (it's not the first part OR the part isn't empty)
                  // This avoids leading separator unless part of overlap, and avoids separator if part is empty.
                  // A simpler rule: if currentChunk is not empty, and we are about to append a non-empty part, add separator.
-                 if (!part.isEmpty() || (currentChunk.length() > 0 && i < parts.size() -1 ) ) { // Add separator if content will follow or if it's an internal separator
-                    // The PHP logic was: if ($currentChunk !== '') $currentChunk .= $this->separator;
-                    // This means separator is added *before* the part if chunk is not empty.
+                 if (!part.isEmpty() || (currentChunk.length() > 0 && i < parts.size() -1 )) { // Add separator if content will follow or if it's an internal separator
+                    // Currently separator is added *before* the part if chunk is not empty.
                     currentChunk.append(separator);
                  }
             }

@@ -8,9 +8,8 @@ import java.util.List;
  * A toolkit provides a way to group related tools and can offer
  * optional guidelines on how an AI model should utilize these tools effectively.
  *
- * <p>The concept of a Toolkit in PHP was also a direct container of tools.
- * In this Java version, `Toolkit` is an interface, and {@link AbstractToolkitBase}
- * provides a base implementation that can dynamically provide or filter tools.</p>
+ * <p>The `Toolkit` is an interface, and {@link AbstractToolkitBase} provides a base
+ * implementation that can dynamically provide or filter tools.</p>
  */
 public interface Toolkit {
 

@@ -24,15 +24,14 @@ import java.util.stream.Stream;
  * An abstract base class implementing the {@link Agent} interface.
  * It provides common functionalities such as managing providers, instructions, tools,
  * chat history, and observers. It also includes foundational logic for chat, streaming,
- * and structured output interactions, ported from PHP traits.
+ * and structured output interactions.
  *
  * Concrete agent implementations should extend this class.
  *
- * Notable differences or areas for future refinement from PHP version:
+ * Areas for future refinement:
  * - Tool Execution: The `executeTools` and `findTool` methods are placeholders and require
  *   a robust mechanism for tool registration, discovery, and invocation (e.g., using reflection
- *   or a structured `com.skanga.tools.Tool` interface). The current implementation
- *   is a direct port of a simplified PHP logic.
+ *   or a structured `com.skanga.tools.Tool` interface).
  * - Message Handling: The `com.skanga.chat.messages.Message` class is now used, which is different
  *   from the previous `com.skanga.core.messages.Message` record. Adjustments in how messages,
  *   especially tool call requests/responses, are packaged and interpreted by AIProvider might be needed.
@@ -81,9 +80,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
         }
     }
 
-    // Static factory 'make()' from PHP is omitted as BaseAgent is abstract.
-    // Concrete subclasses can provide their own static factory methods.
-
     @Override
     public Agent withProvider(AIProvider provider) {
         this.provider = provider;
@@ -112,8 +108,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
 
     @Override
     public Agent addTool(Object tool) {
-        // PHP version used a Toolkit object which managed a list of tools.
-        // Here, we add directly to a List. A dedicated Toolkit class might be reintroduced.
         this.tools.add(tool);
         notifyObservers("tool-added", tool); // Event needs to be defined
         return this;
@@ -133,8 +127,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
     @Override
     public ChatHistory resolveChatHistory() {
         if (this.chatHistory == null) {
-            // PHP version could instantiate a default InMemoryChatHistory.
-            // Here, we require it to be explicitly set for now.
             throw new AgentException("ChatHistory has not been set for this agent.");
         }
         return this.chatHistory;
@@ -221,7 +213,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
             // Placeholder for actual tool execution.
             // Needs to find the tool by name (toolCall.function().name())
             // and execute it with toolCall.function().arguments().
-            // The PHP version iterated over $this->tools which was a Toolkit.
             Object toolInstance = findTool(toolCall.function().name()); // findTool is a placeholder
             String executionResultContent;
             if (toolInstance != null && toolInstance instanceof com.skanga.tools.Tool) { // Check if it's our Tool interface
@@ -259,7 +250,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
      * @return The tool object, or null if not found.
      */
     protected Object findTool(String toolName) {
-        // PHP: $tool = $this->tools->getTool($toolCall->function->name);
         // Assumes this.tools is a list of com.skanga.tools.Tool instances.
         for (Object tool : this.tools) {
             if (tool instanceof com.skanga.tools.Tool && ((com.skanga.tools.Tool) tool).getName().equals(toolName)) {
@@ -337,7 +327,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
 
         try {
             // 1. Fill chat history (from request, if not already there or if it's a new turn)
-            // This step was implicit in PHP's $this->chatHistory->addMessages($request->messages)
             // In Java, BaseAgent.fillChatHistory needs to be called.
             fillChatHistory(request);
 
@@ -413,7 +402,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
     @Override
     public Stream<String> stream(MessageRequest request) {
         // Similar to chatAsync, needs to manage history, tools, and provider call.
-        // PHP: HandleStream::stream()
         notifyObservers("stream-start", request); // Define StreamStart event
 
         fillChatHistory(request);
@@ -493,7 +481,7 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
         // Prepare tools for provider (e.g., for function calling if used for structured output)
         List<Object> toolsForProvider = bootstrapTools();
 
-        // Schema generation placeholder - PHP used a JsonSchema class.
+        // Schema generation placeholder
         // Object schema = JsonSchema.fromClass(responseClass);
         // For now, schema is passed to provider if provider's `structured` method needs it.
         // OpenAI's JSON mode doesn't take schema directly in API, but uses prompt.
@@ -588,12 +576,9 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
      * @throws AgentException if extraction, deserialization, or validation fails.
      */
     protected <T> T processResponse(Message response, Object schema, Class<T> responseClass) {
-        // This method mirrors PHP's HandleStructured::processResponse
-
         notifyObservers("structured-output-event", com.skanga.observability.events.StructuredOutputEvent.extracting(response, responseClass));
 
         // 1. Extract JSON string from response content
-        // PHP: $json = JsonExtractor::extract($response->content);
         // Here, assume response.getContent() is the JSON string or needs minimal extraction.
         String jsonString;
         if (response.getContent() instanceof String) {
@@ -628,7 +613,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
         notifyObservers("structured-output-event", com.skanga.observability.events.StructuredOutputEvent.extracted(response, jsonString, responseClass));
 
         // 2. Deserialize
-        // PHP: $object = Deserializer::deserialize($json, $this->getOutputClass());
         notifyObservers("structured-output-event", com.skanga.observability.events.StructuredOutputEvent.deserializing(jsonString, responseClass));
         T deserializedObject;
         try {
@@ -643,7 +627,6 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
         notifyObservers("structured-output-event", com.skanga.observability.events.StructuredOutputEvent.deserialized(jsonString, deserializedObject, responseClass));
 
         // 3. Validate (Placeholder for now)
-        // PHP: $this->validator->validate($object, $schema);
         notifyObservers("structured-output-event", com.skanga.observability.events.StructuredOutputEvent.validating(deserializedObject, schema, responseClass));
         // boolean isValid = true; // Actual validation logic needed here
         // if (!isValid) {
@@ -666,17 +649,7 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
         return cause;
     }
 
-    /**
-     * Placeholder from PHP's HandleStructured trait.
-     * In Java, the target class is passed directly to `structured` and `processResponse`.
-     * @throws UnsupportedOperationException always.
-     */
-    protected String getOutputClass() {
-        throw new UnsupportedOperationException("getOutputClass() is not used in this Java implementation. Target class is passed directly.");
-    }
-
     // --- Helper methods (to be implemented or made abstract by concrete agents) ---
-
     /**
      * Fills the chat history with the current request messages.
      * This version adds messages from {@link MessageRequest} to the agent's {@link ChatHistory}.
@@ -717,10 +690,8 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
      * @return A list of tools (currently List&lt;Object&gt;).
      */
     protected List<Object> bootstrapTools() {
-        // PHP: $tools = $this->toolSchemaGenerator->generate($this->tools);
-        // This Java version currently passes raw tool objects.
-        // AIProvider implementations (like OpenAIProvider) will convert these
-        // using tool.getJsonSchema() if they are com.skanga.tools.Tool instances.
+        // Pass raw tool objects to AIProvider implementations (like OpenAIProvider) which
+        // will convert these using tool.getJsonSchema() if they are com.skanga.tools.Tool instances.
         if (this.tools == null || this.tools.isEmpty()) {
             return new ArrayList<>();
         }

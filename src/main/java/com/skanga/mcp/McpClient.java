@@ -128,7 +128,7 @@ public class McpClient {
         // 2. Send "notifications/initialized" notification (no ID, no response expected from server for this)
         Map<String, Object> initializedNotification = createJsonRpcNotification("notifications/initialized", null);
         transport.send(initializedNotification);
-        // Per JSON-RPC, no response for notifications. PHP client also doesn't wait for one here.
+        // Per JSON-RPC, no response for notifications.
     }
 
     /**
@@ -149,8 +149,6 @@ public class McpClient {
                 params.put("cursor", cursor);
             }
             // Some servers might support a "limit" parameter, e.g., params.put("limit", 50);
-            // The PHP client did not seem to send a limit by default for listTools.
-
             Map<String, Object> rpcResponse = sendRequestAndGetResponse("tools/list", params);
 
             Object resultObj = rpcResponse.get("result");

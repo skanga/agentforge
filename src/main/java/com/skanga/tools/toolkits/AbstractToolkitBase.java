@@ -18,9 +18,8 @@ import java.util.stream.Collectors;
  * they can offer. The {@link #getTools()} method will then handle filtering
  * based on any exclusions.</p>
  *
- * <p>This differs slightly from the PHP `Toolkit` which acted more like a direct
- * container (ArrayObject). This Java version uses an abstract method `provideTools()`
- * for subclasses to define their toolset, promoting more dynamic or configured tool loading.</p>
+ * <p>This implementation uses an abstract method `provideTools()` for subclasses
+ * to define their toolset, promoting more dynamic or configured tool loading.</p>
  */
 public abstract class AbstractToolkitBase implements Toolkit {
 

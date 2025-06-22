@@ -36,8 +36,8 @@ public class ObjectToolProperty extends BaseToolProperty {
     /**
      * Optional: The Java class that this object property might map to.
      * Currently unused for schema generation but can be useful for deserialization or type hints.
-     * The PHP version had more elaborate logic for generating schema from a class via reflection,
-     * which is deferred in this Java port (schema defined by explicitly adding ToolProperty instances).
+     * TODO: Consider generating schema from a class via reflection, instead of schema defined by
+     * explicitly adding ToolProperty instances (current implementation).
      */
     private final Class<?> targetClass;
 

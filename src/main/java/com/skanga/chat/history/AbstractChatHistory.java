@@ -28,21 +28,18 @@ import java.util.stream.Collectors;
  * context window limiting (by message count or token count - currently simplified to message count),
  * and basic serialization/deserialization logic.
  *
- * Key differences/notes from PHP version:
- * - Context Window: PHP version had token-based `cutHistoryToContextWindow` and `getFreeMemory`.
- *   This Java version simplifies it to message count for `cutHistoryToContextWindow`.
+ * Notes:
+ * - Context Window: Instead of a token-based `cutHistoryToContextWindow` and `getFreeMemory`,
+ *   this implementation uses message count for `cutHistoryToContextWindow`.
  *   Token-based limiting would require robust token counting for each message.
- * - Deserialization: The `deserializeMessages` and related helpers are ported.
- *   They attempt to reconstruct specific message types (UserMessage, AssistantMessage)
- *   and complex content (ToolCallMessage, ToolCallResultMessage) from maps. This logic
- *   can be complex due_to `Object content` in {@link Message}. It assumes specific map structures
+ * - Deserialization: The `deserializeMessages` and related helpers attempt to reconstruct specific
+ *   message types (UserMessage, AssistantMessage) and complex content (ToolCallMessage,
+ *   ToolCallResultMessage) from maps. This logic can be complex due_to `Object content` in
+ *   {@link Message}. It assumes specific map structures
  *   created during serialization (e.g., by `toJsonSerializableMap`).
  *   Using Jackson for direct serialization/deserialization of `List<Message>` with
  *   properly annotated DTOs/polymorphic handling (`@JsonTypeInfo`) would be a more robust
  *   Java-idiomatic approach for persistence than manual map-based deserialization.
- * - `Tool.java` Dependency: PHP deserialization for tool calls/results referenced `Tool::class`.
- *   This version avoids direct dependency on `com.skanga.tools.Tool` in deserialization logic
- *   by using the message content types directly (e.g. `ToolCallMessage`).
  */
 public abstract class AbstractChatHistory implements ChatHistory {
 
@@ -73,7 +70,7 @@ public abstract class AbstractChatHistory implements ChatHistory {
     @Override
     public void addMessage(Message message) {
         Objects.requireNonNull(message, "Message to add cannot be null.");
-        // PHP: $this->updateUsedTokens($message); // Not directly ported, Usage is on Message
+        // TODO: Usage is on Message. We need to update Used Tokens
         this.history.add(message);
         storeMessage(message); // Hook for persistence
         cutHistoryToContextWindow();
@@ -122,7 +119,7 @@ public abstract class AbstractChatHistory implements ChatHistory {
      * Subclasses can override for token-based truncation.
      */
     protected void cutHistoryToContextWindow() {
-        // Simplified to message count. PHP version had token counting.
+        // Simplified to message count instead of token counting.
         while (this.history.size() > this.contextWindow) {
             // removeOldestMessage() is called, which also handles in-memory list.
             // If a persistent store needs more specific "delete oldest" logic, it should override removeOldestMessage.

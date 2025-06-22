@@ -54,8 +54,6 @@ public interface Tool extends ToolPropertySchema {
      * Gets the list of parameters that this tool accepts as input.
      * Each parameter is defined by a {@link ToolProperty} object, which includes its
      * name, type, description, and whether it's required.
-     * Renamed from `getProperties` in PHP's `ToolInterface` to avoid potential confusion in Java,
-     * as "properties" can also refer to general object fields.
      *
      * @return A list of {@link ToolProperty} objects defining the tool's input parameters.
      */
@@ -64,7 +62,6 @@ public interface Tool extends ToolPropertySchema {
     /**
      * Gets a list of names of parameters that are required for this tool to execute.
      * This is derived from the `isRequired()` flag of each {@link ToolProperty} in {@link #getParameters()}.
-     * Renamed from `getRequiredProperties` in PHP.
      *
      * @return A list of names for required parameters.
      */

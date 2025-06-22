@@ -1,416 +1,677 @@
-# NeuronAI Java: Intelligent Agent Framework
+# AgentForge
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/your_org/neuronai-java/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/com.neuronai/neuronai-java.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:com.neuronai%20AND%20a:neuronai-java)
-[![License](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
-[![Javadoc](https://img.shields.io/badge/javadoc-available-brightgreen.svg)](https://your_org.github.io/neuronai-java/javadoc/)
+[![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/Build-Passing-green.svg)](#)
 
-## Introduction
+A comprehensive Java framework for building AI agents with Model Context Protocol (MCP) support, Retrieval-Augmented Generation (RAG), and workflow orchestration capabilities.
 
-NeuronAI Java is a versatile framework for building applications powered by Large Language Models (LLMs). It provides a comprehensive suite of tools and abstractions to streamline the development of AI agents, Retrieval Augmented Generation (RAG) pipelines, complex workflows, and integrations with various LLM providers. This library is a Java port of the original NeuronAI PHP library, aiming to bring its powerful features to the Java ecosystem.
+## 🚀 Features
 
-Whether you're looking to create sophisticated chatbots, data-driven Q&A systems, automated task executors, or orchestrated multi-step processes, NeuronAI Java offers the building blocks to accelerate your development.
+### Core Capabilities
+- **Multi-Provider AI Support**: OpenAI, Anthropic, Gemini, Ollama, Mistral, DeepSeek
+- **Model Context Protocol (MCP)**: Full MCP client implementation for tool integration
+- **RAG (Retrieval-Augmented Generation)**: Complete document processing and vector search
+- **Workflow Orchestration**: Visual workflow builder with conditional logic
+- **Tool System**: Extensible tool framework with JSON schema validation
+- **Observability**: Built-in monitoring, tracing, and event system
 
-## Features
+### Advanced Features
+- **Streaming Support**: Real-time response streaming for all providers
+- **Structured Output**: Type-safe JSON schema validation
+- **Multi-modal**: Text, image, and document processing
+- **Persistent Chat History**: File-based and in-memory storage
+- **Vector Databases**: ChromaDB, Elasticsearch, Pinecone, file-based storage
+- **Post-processing**: Document reranking with Cohere and Jina
+- **Embeddings**: OpenAI, Ollama, Voyage AI support
 
-*   **Multi-Provider LLM Access:** Easily switch between different LLM providers (OpenAI, Anthropic, Gemini, Ollama, and OpenAI-compatible ones like Deepseek, Mistral) with a unified interface.
-*   **Chat & Streaming:** Supports standard chat interactions and streaming responses for real-time applications.
-*   **Structured Output:** Enables reliable extraction of structured data (JSON) from LLM responses.
-*   **Tool Usage (Function Calling):** Define custom tools that LLMs can intelligently decide to use, allowing agents to interact with external systems and data sources.
-*   **Retrieval Augmented Generation (RAG):**
-    *   Document loading from various sources (file system, strings).
-    *   Text splitting strategies.
-    *   Multiple embedding provider integrations.
-    *   Vector store support (in-memory, file-based, and clients for ChromaDB, Elasticsearch, Pinecone scaffold).
-    *   Document post-processing and reranking (e.g., Cohere Rerank).
-*   **Workflow Engine:** Define and execute complex, stateful workflows composed of interconnected nodes and conditional logic. Supports interruption, persistence (in-memory, file-based planned), and resumption.
-*   **Model Context Protocol (MCP) Connector:** Integrate external tool servers that adhere to the MCP standard, discovered and executed via stdio.
-*   **Observability:**
-    *   Built-in logging via SLF4J (`LoggingObserver`).
-    *   OpenTelemetry support (`OpenTelemetryAgentMonitor`) for tracing and APM integration, providing insights into agent execution, LLM calls, tool usage, and RAG pipeline performance.
+## 📋 Table of Contents
 
-## Prerequisites
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
+- [Core Concepts](#-core-concepts)
+- [Usage Examples](#-usage-examples)
+- [Configuration](#-configuration)
+- [Architecture](#-architecture)
+- [API Reference](#-api-reference)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-*   Java Development Kit (JDK) 17 or later.
-*   Apache Maven (for building the project or including as a dependency).
+## 🏃 Quick Start
 
-## Installation
+### Basic AI Agent
+
+```java
+import com.skanga.core.ConcreteAgent;
+import com.skanga.providers.openai.OpenAIProvider;
+import com.skanga.chat.history.InMemoryChatHistory;
+import com.skanga.core.messages.MessageRequest;
+import com.skanga.chat.messages.UserMessage;
+
+// Create an AI agent
+Agent agent = ConcreteAgent.make()
+    .withProvider(new OpenAIProvider("your-api-key", "gpt-4"))
+    .withChatHistory(new InMemoryChatHistory(100))
+    .withInstructions("You are a helpful AI assistant.");
+
+// Send a message
+Message response = agent.chat(new MessageRequest(
+    new UserMessage("What is the capital of France?")
+));
+
+System.out.println(response.getContent());
+```
+
+### RAG-Enabled Agent
+
+```java
+import com.skanga.rag.RAG;
+import com.skanga.rag.embeddings.OpenAIEmbeddingProvider;
+import com.skanga.rag.vectorstore.MemoryVectorStore;
+import com.skanga.rag.dataloader.FileSystemDocumentLoader;
+
+// Create RAG agent
+RAG ragAgent = new RAG(
+    new OpenAIEmbeddingProvider("your-api-key", "text-embedding-3-small"),
+    new MemoryVectorStore(10)
+)
+.withProvider(new OpenAIProvider("your-api-key", "gpt-4"))
+.withInstructions("Answer questions based on the provided context.");
+
+// Load documents
+FileSystemDocumentLoader loader = new FileSystemDocumentLoader("./docs");
+ragAgent.addDocuments(loader.getDocuments());
+
+// Ask questions with context
+Message answer = ragAgent.answer(new UserMessage("What is mentioned about AI safety?"));
+```
+
+### MCP Tool Integration
+
+```java
+import com.skanga.mcp.McpConnector;
+import com.skanga.tools.Tool;
+
+// Connect to MCP server
+Map<String, Object> mcpConfig = Map.of(
+    "command", "python",
+    "args", List.of("mcp_server.py"),
+    "env", Map.of("API_KEY", "your-key")
+);
+
+McpConnector mcpConnector = new McpConnector(mcpConfig);
+List<Tool> mcpTools = mcpConnector.getTools();
+
+// Add tools to agent
+Agent toolEnabledAgent = ConcreteAgent.make()
+    .withProvider(new OpenAIProvider("your-api-key", "gpt-4"));
+
+for (Tool tool : mcpTools) {
+    toolEnabledAgent.addTool(tool);
+}
+```
+
+## 🛠 Installation
 
 ### Maven
 
-Add the following dependency to your project's `pom.xml`:
+```xml
+<dependency>
+    <groupId>com.skanga</groupId>
+    <artifactId>java-mcp-framework</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### Gradle
+
+```groovy
+implementation 'com.skanga:java-mcp-framework:1.0.0'
+```
+
+### Requirements
+
+- **Java 17+** (Required for HTTP Client and Records)
+- **Maven 3.6+** or **Gradle 7+**
+
+### Optional Dependencies
 
 ```xml
-
+<!-- For PDF processing -->
 <dependency>
-    <groupId>com.skangacom.skanga</groupId> <!-- Replace with actual groupId if different -->
-    <artifactId>neuronai-java</artifactId>
-    <version>LATEST_VERSION</version> <!-- Replace with the latest version from Maven Central -->
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>pdfbox</artifactId>
+    <version>3.0.0</version>
 </dependency>
 
-        <!-- For specific functionalities, you might need additional dependencies: -->
-        <!-- PDF Parsing (for PdfTextFileReader) -->
-        <!--
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>2.0.30</version>
-        </dependency>
-        -->
-        <!-- Elasticsearch Client (for ElasticsearchVectorStore) -->
-        <!--
-        <dependency>
-            <groupId>co.elastic.clients</groupId>
-            <artifactId>elasticsearch-java</artifactId>
-            <version>8.11.1</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.json</groupId>
-            <artifactId>jakarta.json-api</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.json</artifactId>
-            <version>2.0.1</version>
-            <classifier>module</classifier>
-        </dependency>
-        -->
-        <!-- Jackson Databind (often pulled transitively, but good to be aware) -->
-        <!--
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.15.3</version>
-        </dependency>
-        -->
-        <!-- SLF4J API (for LoggingObserver) and an SLF4J implementation (e.g., Logback, Log4j2) -->
-        <!--
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.9</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.4.11</version>
-            <scope>runtime</scope>
-        </dependency>
-        -->
-        <!-- OpenTelemetry API (for OpenTelemetryAgentMonitor) -->
-        <!--
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>1.35.0</version>
-        </dependency>
-        -->
-        <!-- Pinecone/Cohere clients would also be added here if official Java SDKs are used -->
+<!-- For Elasticsearch vector store -->
+<dependency>
+    <groupId>co.elastic.clients</groupId>
+    <artifactId>elasticsearch-java</artifactId>
+    <version>8.11.0</version>
+</dependency>
+
+<!-- For OpenTelemetry observability -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-api</artifactId>
+    <version>1.32.0</version>
+</dependency>
 ```
 
-### Gradle (Groovy DSL)
+## 💡 Core Concepts
 
-```gradle
-implementation 'com.skanga:neuronai-java:LATEST_VERSION' // Replace with actual group/version
+### Agents
 
-// Example for PDFBox
-// implementation 'org.apache.pdfbox:pdfbox:2.0.30'
-
-// Example for Elasticsearch
-// implementation 'co.elastic.clients:elasticsearch-java:8.11.1'
-// implementation 'jakarta.json:jakarta.json-api:2.1.2'
-// implementation 'org.glassfish:jakarta.json:2.0.1:module'
-
-// Example for SLF4J and Logback
-// implementation 'org.slf4j:slf4j-api:2.0.9'
-// runtimeOnly 'ch.qos.logback:logback-classic:1.4.11'
-
-// Example for OpenTelemetry
-// implementation 'io.opentelemetry:opentelemetry-api:1.35.0'
-```
-
-## Core Concepts & Quick Start
-
-### Agent
-
-The `Agent` is the central component for interacting with LLMs.
+Agents are the primary interface for AI interactions. They orchestrate providers, tools, and chat history.
 
 ```java
-import com.skanga.core.Agent;
-import com.skanga.chat.messages.Message;
-import com.skanga.chat.enums.MessageRole;
-import com.skanga.core.messages.MessageRequest;
-import com.skanga.providers.openai.OpenAIProvider; // Example provider
-// For structured output example:
-// import com.fasterxml.jackson.annotation.JsonProperty;
-// import java.util.Map;
+// Basic agent
+Agent agent = ConcreteAgent.make()
+    .withProvider(provider)
+    .withChatHistory(chatHistory)
+    .withInstructions("System prompt");
 
-// public record Person(@JsonProperty("name") String name, @JsonProperty("age") int age) {}
+// Specialized RAG agent
+RAG ragAgent = new RAG(embeddingProvider, vectorStore)
+    .withProvider(provider);
+```
 
-public class AgentQuickStart {
-    public static void main(String[] args) {
-        // 1. Create an agent (using ConcreteAgent for direct instantiation)
-        Agent agent = new com.skanga.core.ConcreteAgent();
+### Providers
 
-        // 2. Configure an LLM Provider
-        // Ensure you have OPENAI_API_KEY environment variable set or pass directly
-        OpenAIProvider openAI = new OpenAIProvider(System.getenv("OPENAI_API_KEY"), "gpt-3.5-turbo", null);
-        agent.withProvider(openAI);
+Providers abstract different AI service APIs with a unified interface.
 
-        // 3. Set system instructions
-        agent.withInstructions("You are a helpful and concise assistant.");
+```java
+// OpenAI
+AIProvider openai = new OpenAIProvider("api-key", "gpt-4")
+    .systemPrompt("You are helpful");
 
-        // 4. Simple chat
-        System.out.println("--- Simple Chat ---");
-        Message userMessage = new Message(MessageRole.USER, "Hello, what is the capital of France?");
-        MessageRequest chatRequest = new MessageRequest(userMessage);
-        Message assistantResponse = agent.chat(chatRequest);
-        System.out.println("AI: " + assistantResponse.getContent());
+// Anthropic
+AIProvider anthropic = new AnthropicProvider("api-key", "claude-3-sonnet");
 
-        // 5. Streaming response
-        System.out.println("\n--- Streaming Chat ---");
-        Message streamUserMessage = new Message(MessageRole.USER, "Tell me a short story about a brave robot.");
-        MessageRequest streamRequest = new MessageRequest(streamUserMessage);
-        System.out.print("AI Stream: ");
-        agent.stream(streamRequest).forEach(System.out::print);
-        System.out.println();
+// Local Ollama
+AIProvider ollama = new OllamaProvider("http://localhost:11434", "llama2");
+```
 
-        // 6. Structured output (Example - requires Person record and schema)
-        // System.out.println("\n--- Structured Output ---");
-        // Message structuredQuery = new Message(MessageRole.USER, "Extract person data: John Doe is 30 years old.");
-        // // Define expected JSON schema for the Person record
-        // Map<String, Object> personSchema = Map.of(
-        //     "type", "object",
-        //     "properties", Map.of(
-        //         "name", Map.of("type", "string", "description", "The person's full name."),
-        //         "age", Map.of("type", "integer", "description", "The person's age in years.")
-        //     ),
-        //     "required", List.of("name", "age")
-        // );
-        // try {
-        //     // The AIProvider's structured method needs to be implemented to use the schema.
-        //     // OpenAIProvider.structured() uses JSON mode with schema in prompt.
-        //     // Person person = agent.structured(new MessageRequest(structuredQuery), Person.class, 3, personSchema);
-        //     // System.out.println("Structured Person: " + person);
-        //     System.out.println("Structured Output: (Ensure provider's structured method is fully implemented with schema handling)");
-        // } catch (Exception e) {
-        //     System.err.println("Structured output error: " + e.getMessage());
-        // }
+### Tools
+
+Tools extend agent capabilities with external functions.
+
+```java
+Tool calculator = new BaseTool("calculator", "Performs calculations")
+    .addParameter("expression", PropertyType.STRING, "Math expression", true)
+    .setCallable(input -> {
+        String expr = (String) input.getArgument("expression");
+        return new ToolExecutionResult(evaluateExpression(expr));
+    });
+
+agent.addTool(calculator);
+```
+
+### Vector Stores
+
+Vector stores provide semantic search capabilities for RAG.
+
+```java
+// In-memory store
+VectorStore memoryStore = new MemoryVectorStore(10);
+
+// ChromaDB
+VectorStore chromaStore = new ChromaVectorStore(
+    "http://localhost:8000", "collection-name", 10
+);
+
+// Elasticsearch
+VectorStore elasticStore = new ElasticsearchVectorStore(
+    elasticsearchClient, "index-name", 10
+);
+```
+
+### Workflows
+
+Workflows orchestrate complex multi-step processes.
+
+```java
+Workflow workflow = new Workflow("data-processing")
+    .addNode(new DataExtractionNode("extract"))
+    .addNode(new ValidationNode("validate"))
+    .addNode(new ProcessingNode("process"))
+    .addEdge("extract", "validate")
+    .addEdge("validate", "process", state -> 
+        (Boolean) state.get("validation_passed"))
+    .setStartNodeId("extract")
+    .setEndNodeId("process");
+
+WorkflowState result = workflow.run(new WorkflowState());
+```
+
+## 📚 Usage Examples
+
+### Streaming Responses
+
+```java
+Stream<String> stream = agent.stream(new MessageRequest(
+    new UserMessage("Write a long story about space exploration")
+));
+
+stream.forEach(System.out::print);
+```
+
+### Structured Output
+
+```java
+public record WeatherReport(String location, int temperature, String condition) {}
+
+WeatherReport weather = agent.structured(
+    new MessageRequest(new UserMessage("What's the weather in Paris?")),
+    WeatherReport.class,
+    3 // max retries
+);
+
+System.out.println("Temperature: " + weather.temperature() + "°C");
+```
+
+### Multi-modal Input
+
+```java
+import com.skanga.chat.attachments.Image;
+import com.skanga.chat.enums.AttachmentContentType;
+
+UserMessage imageMessage = new UserMessage("Describe this image");
+imageMessage.addAttachment(new Image(
+    base64ImageData, 
+    AttachmentContentType.BASE64, 
+    "image/jpeg"
+));
+
+Message response = agent.chat(new MessageRequest(imageMessage));
+```
+
+### Document Processing Pipeline
+
+```java
+// Load and process documents
+FileSystemDocumentLoader loader = new FileSystemDocumentLoader("./documents")
+    .withTextSplitter(new DelimiterTextSplitter(1000, "\\n\\n", 50));
+
+List<Document> documents = loader.getDocuments();
+
+// Add post-processing
+CohereRerankerPostProcessor reranker = new CohereRerankerPostProcessor(
+    "cohere-api-key", "rerank-english-v2.0", 5
+);
+
+ragAgent.addPostProcessor(reranker);
+ragAgent.addDocuments(documents);
+```
+
+### Observability Integration
+
+```java
+import com.skanga.observability.LoggingObserver;
+import com.skanga.observability.OpenTelemetryAgentMonitor;
+
+// Add logging
+agent.addObserver(new LoggingObserver(), "*");
+
+// Add OpenTelemetry tracing
+Tracer tracer = GlobalOpenTelemetry.getTracer("my-app");
+agent.addObserver(new OpenTelemetryAgentMonitor(tracer), "*");
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+```bash
+# API Keys
+export OPENAI_API_KEY="your-openai-key"
+export ANTHROPIC_API_KEY="your-anthropic-key"
+export COHERE_API_KEY="your-cohere-key"
+
+# Vector Store Configuration
+export CHROMA_HOST="http://localhost:8000"
+export ELASTICSEARCH_URL="http://localhost:9200"
+
+# MCP Server Configuration
+export MCP_SERVER_COMMAND="python"
+export MCP_SERVER_ARGS="server.py,--port,8080"
+```
+
+### Configuration Files
+
+```yaml
+# application.yml
+ai:
+  providers:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      model: "gpt-4"
+      max-tokens: 4096
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+      model: "claude-3-sonnet"
+      
+  vector-stores:
+    default:
+      type: "chroma"
+      host: "http://localhost:8000"
+      collection: "documents"
+      
+  embeddings:
+    provider: "openai"
+    model: "text-embedding-3-small"
+    dimensions: 1536
+```
+
+### Programmatic Configuration
+
+```java
+Map<String, Object> config = Map.of(
+    "provider", "openai",
+    "model", "gpt-4",
+    "temperature", 0.7,
+    "max_tokens", 2048
+);
+
+AIProvider provider = ProviderFactory.create(config);
+```
+
+## 🏗 Architecture
+
+### Core Components
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│     Agents      │    │    Providers    │    │     Tools       │
+│                 │◄──►│                 │    │                 │
+│ - ConcreteAgent │    │ - OpenAI        │    │ - BaseTool      │
+│ - RAG           │    │ - Anthropic     │    │ - MCP Tools     │
+│ - BaseAgent     │    │ - Gemini        │    │ - Toolkits      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   Chat System   │
+                    │                 │
+                    │ - Messages      │
+                    │ - History       │
+                    │ - Attachments   │
+                    └─────────────────┘
+```
+
+### RAG Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ Document Loader │───►│  Text Splitter  │───►│   Embeddings    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │
+┌─────────────────┐    ┌─────────────────┐              │
+│ Post Processors │◄───│ Vector Store    │◄─────────────┘
+└─────────────────┘    └─────────────────┘
+         │                       │
+         └───────────────────────┼───────────────┐
+                                 │               │
+                    ┌─────────────────┐         │
+                    │   RAG Agent     │◄────────┘
+                    │                 │
+                    │ - Retrieval     │
+                    │ - Generation    │
+                    │ - Context       │
+                    └─────────────────┘
+```
+
+### Workflow System
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│     Nodes       │    │     Edges       │    │   Workflow      │
+│                 │    │                 │    │                 │
+│ - AbstractNode  │    │ - Conditions    │    │ - Execution     │
+│ - Custom Nodes  │    │ - Transitions   │    │ - Persistence   │
+└─────────────────┘    └─────────────────┘    │ - Observability │
+                                              └─────────────────┘
+```
+
+### Data Flow
+
+1. **Input Processing**: Messages → Validation → History
+2. **Context Augmentation**: RAG retrieval → Document ranking → Context injection
+3. **AI Processing**: Provider API call → Tool execution → Response generation
+4. **Output Processing**: Structured validation → History storage → Response delivery
+
+## 📖 API Reference
+
+### Core Interfaces
+
+#### Agent Interface
+```java
+public interface Agent {
+    Agent withProvider(AIProvider provider);
+    Agent withInstructions(String instructions);
+    Agent addTool(Object tool);
+    Agent withChatHistory(ChatHistory chatHistory);
+    
+    Message chat(MessageRequest messages);
+    CompletableFuture<Message> chatAsync(MessageRequest messages);
+    Stream<String> stream(MessageRequest messages);
+    <T> T structured(MessageRequest messages, Class<T> responseClass, int maxRetries);
+    
+    void addObserver(AgentObserver observer, String event);
+    void removeObserver(AgentObserver observer);
+}
+```
+
+#### AIProvider Interface
+```java
+public interface AIProvider {
+    CompletableFuture<Message> chatAsync(List<Message> messages, String instructions, List<Object> tools);
+    Stream<String> stream(List<Message> messages, String instructions, List<Object> tools);
+    <T> T structured(List<Message> messages, Class<T> responseClass, Map<String, Object> responseSchema);
+    
+    AIProvider systemPrompt(String prompt);
+    AIProvider setTools(List<Object> tools);
+    AIProvider setHttpClient(Object client);
+}
+```
+
+#### VectorStore Interface
+```java
+public interface VectorStore {
+    void addDocument(Document document) throws VectorStoreException;
+    void addDocuments(List<Document> documents) throws VectorStoreException;
+    List<Document> similaritySearch(List<Double> queryEmbedding, int k) throws VectorStoreException;
+}
+```
+
+### Exception Hierarchy
+
+```
+BaseAiException
+├── AgentException
+├── ProviderException
+├── ToolException
+│   ├── ToolCallableException
+│   └── MissingToolParameterException
+├── EmbeddingException
+├── VectorStoreException
+├── PostProcessorException
+├── ChatHistoryException
+├── WorkflowException
+│   ├── WorkflowInterrupt
+│   └── WorkflowExportException
+└── McpException
+```
+
+## 🔍 Monitoring & Observability
+
+### Events
+
+The framework emits detailed events for monitoring:
+
+- `chat-start` / `chat-stop`: Agent conversations
+- `inference-start` / `inference-stop`: Provider API calls
+- `tool-calling` / `tool-called`: Tool executions
+- `vectorstore-searching` / `vectorstore-result`: RAG operations
+- `workflow-node-start` / `workflow-node-stop`: Workflow execution
+- `structured-output-event`: Structured output processing
+- `error`: Error conditions
+
+### Metrics
+
+Key metrics to monitor:
+
+- **Performance**: Response times, token usage, throughput
+- **Reliability**: Error rates, retry counts, timeouts
+- **Resource Usage**: Memory, CPU, network connections
+- **Business**: Conversation counts, tool usage, document retrievals
+
+### Example Monitoring Setup
+
+```java
+// Custom observer for metrics
+public class MetricsObserver implements AgentObserver {
+    private final MeterRegistry meterRegistry;
+    
+    @Override
+    public void update(String eventType, Object eventData) {
+        switch (eventType) {
+            case "chat-stop" -> {
+                ChatStop event = (ChatStop) eventData;
+                Timer.Sample.stop(Timer.builder("chat.duration")
+                    .register(meterRegistry));
+            }
+            case "error" -> {
+                Counter.builder("errors.total")
+                    .tag("type", eventType)
+                    .register(meterRegistry)
+                    .increment();
+            }
+        }
     }
 }
 ```
 
-### Tools (Function Calling)
+## 🧪 Testing
 
-Define tools for the agent to use.
-
-```java
-
-// ... other imports from AgentQuickStart ...
-
-// In your main or setup:
-BaseTool weatherTool=new BaseTool("get_current_weather","Get the current weather in a given location.");
-        weatherTool.addParameter("location",PropertyType.STRING,"The city and state, e.g., San Francisco, CA",true);
-        weatherTool.addParameter("unit",PropertyType.STRING,"Temperature unit (celsius or fahrenheit)",false)
-        .getEnumList().addAll(List.of("celsius","fahrenheit")); // Example of adding enum to last param
-
-        weatherTool.setCallable(input->{
-        String location=(String)input.getArgument("location");
-        String unit=(String)input.getArgumentOrDefault("unit","celsius");
-        // Actual weather lookup logic here...
-        System.out.println("Tool: get_current_weather called for "+location+" in "+unit);
-        return new ToolExecutionResult(Map.of("temperature","22","unit",unit,"condition","Sunny"));
-        });
-
-// Agent setup from AgentQuickStart
-// Agent agent = ...;
-// agent.addTool(weatherTool);
-
-// Example interaction (LLM might decide to call the tool)
-// Message userToolQuery = new Message(MessageRole.USER, "What's the weather like in Boston?");
-// Message assistantResponseWithToolCall = agent.chat(new MessageRequest(userToolQuery));
-// System.out.println("AI (Tool Call Flow): " + assistantResponseWithToolCall.getContent());
-// If assistantResponseWithToolCall.getContent() is a ToolCallMessage, BaseAgent handles it.
-```
-
-### RAG (Retrieval Augmented Generation)
-
-Augment LLM responses with retrieved documents.
+### Unit Testing
 
 ```java
-
-// ... other imports ...
-
-// RAG agent setup
-// RAG ragAgent = new RAG();
-// OpenAIEmbeddingProvider embeddingProvider = new OpenAIEmbeddingProvider(System.getenv("OPENAI_API_KEY"), "text-embedding-3-small");
-// MemoryVectorStore vectorStore = new MemoryVectorStore();
-// ragAgent.setEmbeddingProvider(embeddingProvider);
-// ragAgent.setVectorStore(vectorStore);
-// ragAgent.withProvider(openAI); // Set an LLM provider for generation
-
-// Add documents
-// List<Document> docs = List.of(
-//     new Document("The Neuron SDK for Java helps build LLM apps."),
-//     new Document("RAG combines retrieval with generative models.")
-// );
-// ragAgent.addDocuments(docs); // This will embed and then add to vector store
-
-// Ask a question
-// Message ragQuestion = new Message(MessageRole.USER, "What is the Neuron SDK for?");
-// Message ragResponse = ragAgent.answer(ragQuestion); // answer() handles retrieval and chat
-// System.out.println("RAG AI: " + ragResponse.getContent());
+@Test
+void testAgentBasicConversation() {
+    // Mock provider
+    AIProvider mockProvider = Mockito.mock(AIProvider.class);
+    when(mockProvider.chatAsync(any(), any(), any()))
+        .thenReturn(CompletableFuture.completedFuture(
+            new AssistantMessage("Hello!")
+        ));
+    
+    Agent agent = ConcreteAgent.make()
+        .withProvider(mockProvider)
+        .withChatHistory(new InMemoryChatHistory(10));
+    
+    Message response = agent.chat(new MessageRequest(
+        new UserMessage("Hi")
+    ));
+    
+    assertEquals("Hello!", response.getContent());
+}
 ```
 
-### Workflow Engine
-
-Orchestrate complex tasks with a graph-based workflow engine.
+### Integration Testing
 
 ```java
-
-// ... other imports ...
-
-// Define a simple node
-// class GreetingNode extends AbstractNode {
-//     public GreetingNode(String id) { super(id); }
-//     @Override
-//     public WorkflowState run(WorkflowContext context) throws WorkflowInterrupt {
-//         String name = (String) context.getCurrentState().get("name");
-//         System.out.println("Node " + getId() + ": Hello, " + name + "!");
-//         context.getCurrentState().put(getId() + "_output", "Greeted " + name);
-//         return context.getCurrentState();
-//     }
-// }
-
-// Workflow setup
-// Workflow workflow = new Workflow();
-// GreetingNode nodeA = new GreetingNode("nodeA");
-// GreetingNode nodeB = new GreetingNode("nodeB");
-
-// workflow.addNode(nodeA).addNode(nodeB)
-//         .setStartNodeId("nodeA")
-//         .addEdge("nodeA", "nodeB");
-
-// Run the workflow
-// WorkflowState initialState = new WorkflowState(Map.of("name", "WorkflowUser"));
-// try {
-//     WorkflowState finalState = workflow.run(initialState);
-//     System.out.println("Workflow finished. Final state: " + finalState.getAll());
-// } catch (WorkflowException | WorkflowInterrupt e) {
-//     System.err.println("Workflow error or interrupt: " + e.getMessage());
-// }
+@Test
+void testRAGEndToEnd() {
+    // Use test containers for vector store
+    ChromaVectorStore vectorStore = new ChromaVectorStore(
+        "http://localhost:8000", "test-collection", 5
+    );
+    
+    RAG ragAgent = new RAG(
+        new MockEmbeddingProvider(),
+        vectorStore
+    );
+    
+    // Test document ingestion and retrieval
+    ragAgent.addDocuments(testDocuments);
+    Message answer = ragAgent.answer(new UserMessage("Test question"));
+    
+    assertNotNull(answer.getContent());
+}
 ```
 
-## Modules Overview
+## 🤝 Contributing
 
-*   **`com.skanga.core`**: Core interfaces (`Agent`, `AIProvider`, `AgentObserver`) and base agent logic (`BaseAgent`).
-*   **`com.skanga.chat`**: Classes for chat messages (`Message`, `UserMessage`, `AssistantMessage`), attachments, enums, and chat history management.
-*   **`com.skanga.providers`**: Implementations for various LLM providers (OpenAI, Anthropic, Gemini, Ollama, etc.) and their message mappers.
-*   **`com.skanga.tools`**: Framework for defining and using tools (function calling) with agents, including properties, schemas, and toolkits.
-*   **`com.skanga.rag`**: Components for building RAG pipelines: document loaders, text splitters, embedding providers, vector stores, and post-processors.
-*   **`com.skanga.mcp`**: Model Context Protocol client and transport for interacting with external MCP tool servers.
-*   **`com.skanga.observability`**: Event definitions and observers for logging (SLF4J) and APM tracing (OpenTelemetry).
-*   **`com.skanga.workflow`**: Workflow engine components for defining and executing graph-based workflows, including persistence and state management.
+### Development Setup
 
-## LLM Providers
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/java-mcp-framework.git
+   cd java-mcp-framework
+   ```
 
-NeuronAI Java aims to support a variety of LLM providers:
+2. **Install dependencies**
+   ```bash
+   mvn clean install
+   ```
 
-*   **OpenAI:** `OpenAIProvider` (uses `gpt-3.5-turbo`, `gpt-4`, etc.)
-*   **Anthropic:** `AnthropicProvider` (uses Claude models)
-*   **Google Gemini:** `GeminiProvider` (uses Gemini models like `gemini-pro`)
-*   **Ollama:** `OllamaProvider` (connects to a local Ollama instance for various models)
-*   **Deepseek:** `DeepseekProvider` (OpenAI-compatible)
-*   **Mistral:** `MistralProvider` (OpenAI-compatible via Mistral API)
+3. **Run tests**
+   ```bash
+   mvn test
+   ```
 
-**Configuration:**
-Most providers require an API key and a model name passed to their constructor. Additional parameters (like temperature, max tokens) can often be supplied in a `Map<String, Object>`.
+4. **Start development services**
+   ```bash
+   docker-compose up -d  # ChromaDB, Elasticsearch
+   ```
 
-```java
-// Example: OpenAI
-// OpenAIProvider openAI = new OpenAIProvider("YOUR_OPENAI_KEY", "gpt-4-turbo-preview", Map.of("temperature", 0.7));
+### Code Style
 
-// Example: Anthropic
-// AnthropicProvider anthropic = new AnthropicProvider("YOUR_ANTHROPIC_KEY", "claude-3-opus-20240229", "2023-06-01", 4096, null);
+- Follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+- Use meaningful variable and method names
+- Add comprehensive JavaDoc comments
+- Maintain test coverage above 80%
 
-// Example: Ollama (assumes Ollama running at http://localhost:11434)
-// OllamaProvider ollama = new OllamaProvider("http://localhost:11434", "llama2", Map.of("temperature", 0.5));
-```
+### Pull Request Process
 
-OpenAI-compatible providers like Deepseek, Mistral (using their official APIs), and often Ollama can leverage the `OpenAIProvider`'s structure by extending it and primarily changing the `baseUri`.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes with tests
+4. Run the full test suite: `mvn verify`
+5. Commit your changes: `git commit -m 'Add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
 
-## Observability
+### Reporting Issues
 
-The library includes observers for logging and tracing:
+Please use the [issue tracker](https://github.com/yourusername/java-mcp-framework/issues) to report bugs or request features. Include:
 
-*   **`LoggingObserver`**: Uses SLF4J to log agent events. You can configure your SLF4J implementation (e.g., Logback, Log4j2) for output.
-    ```java
-    // Logger logger = LoggerFactory.getLogger(MyApplication.class);
-    // agent.addObserver(new LoggingObserver(logger), "*"); // Observe all events
-    ```
-*   **`OpenTelemetryAgentMonitor`**: Creates OpenTelemetry spans for key agent operations, facilitating APM integration.
-    ```java
-    // Assuming you have an OpenTelemetry Tracer instance configured
-    // Tracer tracer = OpenTelemetry.getGlobalTracer("com.skanga.myApp");
-    // agent.addObserver(new OpenTelemetryAgentMonitor(tracer), "*");
-    ```
-    You need to have the OpenTelemetry SDK set up in your application to collect and export traces. Key traced events include:
-    *   `chat-start`/`chat-stop`
-    *   `inference-start`/`inference-stop` (LLM calls)
-    *   `tool-calling`/`tool-called` (Tool executions)
-    *   RAG pipeline events (`rag-vectorstore-searching`, `rag-vectorstore-result`, etc.)
-    *   Agent errors.
+- Java version
+- Framework version
+- Minimal reproduction case
+- Error logs and stack traces
 
-## MCP Connector
+## 📄 License
 
-The Model Context Protocol (MCP) connector allows NeuronAI agents to interface with external tool servers that implement the MCP specification. This is useful for leveraging tools written in other languages or running in separate processes.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-```java
-// import com.skanga.mcp.McpConnector;
-// import com.skanga.tools.Tool;
-// import java.util.List;
-// import java.util.Map;
+## 🙏 Acknowledgments
 
-// Map<String, Object> mcpConfig = Map.of(
-//     "command", "/path/to/mcp_server_executable", // Command to start the MCP server
-//     "args", List.of("--port", "8080"),       // Arguments for the command
-//     "env", Map.of("PYTHONUNBUFFERED", "1")   // Environment variables
-// );
-// McpConnector mcpConnector = new McpConnector(mcpConfig);
-// try {
-//     List<Tool> mcpTools = mcpConnector.getTools();
-//     mcpTools.forEach(tool -> agent.addTool(tool)); // Add discovered tools to agent
-//     // ... use agent with MCP tools ...
-// } catch (McpException e) {
-//     System.err.println("MCP Error: " + e.getMessage());
-// } finally {
-//     // mcpConnector.shutdown(); // Shuts down McpClient and transport
-// }
-```
-The `StdioMcpTransport` handles communication over standard input/output with the server process.
+- [Model Context Protocol](https://modelcontextprotocol.io/) specification
+- [OpenAI](https://openai.com/) for API design inspiration
+- [LangChain](https://langchain.com/) for architectural patterns
+- All contributors and the open-source community
 
-## Known Limitations / Differences from PHP Version
+## 📞 Support
 
-*   **PDF Parsing:** `PdfTextFileReader` uses Apache PDFBox 2.x by default. PDFBox 3.x has API changes; users might need to adjust or provide a custom reader if using PDFBox 3.x features directly.
-*   **Tool Schema from Class:** The PHP version's `ObjectProperty` could generate a JSON schema from a PHP class definition. This reflective schema generation is currently deferred in the Java `ObjectToolProperty` (schema must be built manually by adding `ToolProperty` instances).
-*   **HTTP Client Usage:** The core `OpenAIProvider` (and by extension Deepseek, Mistral) uses Apache HttpClient 5. Newer provider implementations (Anthropic, Gemini, Ollama for chat/embeddings, RAG components like Cohere/Chroma) have started using the JDK 11+ `java.net.http.HttpClient`. This could be standardized in the future.
-*   **StdioMcpTransport Timeouts:** The `receive()` method in `StdioMcpTransport` uses blocking `readLine()`. Robust timeout handling for hung processes is an area for future enhancement.
-*   **RAG `FileVectorStore`:** The current `FileVectorStore` is simple (JSON-L). For large datasets, its search performance will be limited.
-*   **Tool System in PHP:** The PHP version had a more elaborate `Toolkit` that tools were registered with, and the agent held one `Toolkit`. The Java version currently has `Agent` hold a `List<Object>` for tools, and `Toolkit` is an interface for grouping. `BaseAgent.bootstrapTools()` is a placeholder.
-*   **Dynamic Tool Creation in `McpConnector`:** The parsing of `inputSchema` in `McpConnector` to `ToolProperty` objects is a direct port of the structural mapping. Advanced JSON schema features might require more sophisticated parsing.
+- **Documentation**: [https://docs.java-mcp-framework.com](https://docs.java-mcp-framework.com)
+- **Discord**: [Join our community](https://discord.gg/java-mcp-framework)
+- **Stack Overflow**: Tag questions with `java-mcp-framework`
+- **Email**: support@java-mcp-framework.com
 
-## Contributing
+---
 
-Contributions are welcome! Please refer to `CONTRIBUTING.md` for guidelines (Note: `CONTRIBUTING.md` would need to be created).
-Key areas for contribution include:
-*   Implementing more LLM providers and vector stores.
-*   Adding more diverse `DocumentLoader` and `FileReader` implementations.
-*   Enhancing the Workflow Engine with more node types and features.
-*   Improving test coverage.
-*   Refining existing components for performance and features.
-
-## License
-
-This project is licensed under the **Mozilla Public License Version 2.0**.
-See the [LICENSE](LICENSE) file for details (Note: `LICENSE` file would need to be added with MPL-2.0 text).
+**Made with ❤️ by the Java MCP Framework team**

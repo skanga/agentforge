@@ -16,27 +16,21 @@ import java.util.Objects;
 /**
  * Represents a single message in a conversation or interaction.
  * This class is designed to be flexible, allowing for various types of content,
- * attachments, and metadata. It corresponds to the evolved Message class from PHP,
- * which was more feature-rich than a simple record.
+ * attachments, and metadata.
  *
- * Key features ported or adapted from PHP:
+ * Key features:
  * - Role-based messages (user, assistant, tool, system).
- * - Content can be various types (Object in Java, was mixed in PHP). For specific structured
+ * - Content can be various types (so we use Object instead of String). For specific structured
  *   content like tool calls or results, the `content` field would hold specific objects
  *   (e.g., {@link com.skanga.core.messages.ToolCallMessage} or
  *   {@link com.skanga.core.messages.ToolCallResultMessage}).
  * - Support for attachments and metadata.
  * - Usage tracking (tokens).
  *
- * Potential differences/areas for future refinement:
- * - PHP `Message::countTokens()`: Not directly ported. Token counting is usually provider-specific
- *   or would require a separate utility/strategy.
- * - PHP `Message::isToolCall()`, `isToolResult()`, `has()`: These helper methods for inspecting
- *   content structure are not directly ported. Java's `instanceof` checks on `getContent()`
- *   can be used instead (e.g., `message.getContent() instanceof ToolCallMessage`).
- * - Mutability: This class is mutable (setters) to allow for progressive building or updates,
- *   similar to the PHP version. Consider if immutable builders or records for specific message
- *   types would be more idiomatic in some Java contexts.
+ * Potential areas for future refinement:
+ * - Counting Tokens: Token counting is usually provider-specific & would need a separate utility.
+ * - Mutability: This class is mutable (setters) to allow for progressive building or updates.
+ *   Consider if immutable builders or records for specific message types would be better.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL) // Don't serialize null fields
 public class Message {
@@ -49,7 +43,6 @@ public class Message {
      * The content of the message. Can be a simple String (text),
      * or a complex object like {@link com.skanga.core.messages.ToolCallMessage}
      * or {@link com.skanga.core.messages.ToolCallResultMessage}.
-     * Corresponds to `mixed $content` in PHP.
      */
     @JsonProperty("content")
     protected Object content;

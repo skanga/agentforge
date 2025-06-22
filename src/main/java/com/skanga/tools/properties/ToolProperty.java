@@ -17,8 +17,6 @@ public interface ToolProperty extends ToolPropertySchema {
 
     /**
      * Gets the data type of this property.
-     * Renamed from `getType()` in PHP to avoid potential clashes if this were a concrete class
-     * with a generic `getType()` method (e.g., from a base class for typed values).
      * @return The {@link PropertyType} enum value (e.g., STRING, INTEGER, OBJECT).
      */
     PropertyType getPropertyType();

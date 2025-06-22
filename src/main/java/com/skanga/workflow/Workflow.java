@@ -51,16 +51,6 @@ import java.util.stream.Collectors;
  *   <li>{@code workflow-edge-traversed}, {@code workflow-no-condition-met}</li>
  * </ul>
  * </p>
- *
- * <p><b>PHP Differences:</b>
- * <ul>
- *    <li>PHP version used `Makes->__invoke` for node execution. Java uses `Node.run()`.</li>
- *    <li>PHP version used an `Agent` as a node type. This Java version has a more generic `Node` interface;
- *        an `AgentNode` (if created) would wrap an `Agent` to integrate it into a workflow.</li>
- *    <li>Error handling and interruption flow are adapted to Java's exception handling.</li>
- *    <li>Observability is integrated via the {@code ObservableAgentComponent} pattern.</li>
- * </ul>
- * </p>
  */
 public class Workflow implements ObservableAgentComponent {
 

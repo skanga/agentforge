@@ -40,7 +40,6 @@ public interface Agent {
 
     /**
      * Gets the current system-level instructions for the agent.
-     * Renamed from `instructions()` in PHP for Java bean convention.
      * @return The system instructions string.
      */
     String getInstructions();
