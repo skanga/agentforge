@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java MCP Framework - Complete User Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 100vh;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: #34495e;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        nav a:hover {
+            background: #3498db;
+        }
+        
+        main {
+            padding: 2rem;
+        }
+        
+        section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 80px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            color: #34495e;
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem 0;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.5rem 0;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-block::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            background: #3498db;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        
+        pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .architecture-diagram {
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h4 {
+            color: #3498db;
+            margin-top: 0;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 1rem;
+        }
+        
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+            }
+            
+            main {
+                padding: 1rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Java MCP Framework</h1>
+            <p>Model Context Protocol Implementation with AI Agents, RAG, and Workflow Management</p>
+        </header>
+        
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#quickstart">Quick Start</a></li>
+                <li><a href="#agents">AI Agents</a></li>
+                <li><a href="#rag">RAG System</a></li>
+                <li><a href="#workflows">Workflows</a></li>
+                <li><a href="#tools">Tools & MCP</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+        </nav>
+        
+        <main>
+            <div class="toc">
+                <h3>📋 Table of Contents</h3>
+                <ul>
+                    <li><a href="#overview">🎯 Framework Overview</a></li>
+                    <li><a href="#architecture">🏗️ System Architecture</a></li>
+                    <li><a href="#quickstart">🚀 Quick Start Guide</a></li>
+                    <li><a href="#agents">🤖 AI Agents</a></li>
+                    <li><a href="#rag">📚 RAG (Retrieval-Augmented Generation)</a></li>
+                    <li><a href="#workflows">⚡ Workflow Management</a></li>
+                    <li><a href="#tools">🔧 Tools & MCP Integration</a></li>
+                    <li><a href="#troubleshooting">🔍 Troubleshooting</a></li>
+                    <li><a href="#examples">💡 Advanced Examples</a></li>
+                </ul>
+            </div>
+            
+            <section id="overview">
+                <h2>🎯 Framework Overview</h2>
+                
+                <p>The Java MCP Framework is a comprehensive solution for building AI-powered applications with support for multiple LLM providers, document retrieval, workflow orchestration, and the Model Context Protocol (MCP).</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🤖 Multi-Provider AI Agents</h4>
+                        <p>Support for OpenAI, Anthropic, Gemini, Ollama, DeepSeek, and Mistral with unified interface</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📚 RAG System</h4>
+                        <p>Document loading, embedding, vector storage, and intelligent retrieval with post-processing</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>⚡ Workflow Engine</h4>
+                        <p>Visual workflow designer with pause/resume, branching, and state persistence</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔧 Tool Integration</h4>
+                        <p>MCP protocol support and custom tool development framework</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📊 Observability</h4>
+                        <p>Built-in monitoring, logging, and OpenTelemetry integration</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💾 Persistence</h4>
+                        <p>Multiple storage backends for chat history, vectors, and workflow state</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="architecture">
+                <h2>🏗️ System Architecture</h2>
+                
+                <div class="architecture-diagram">
+                    <svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Background -->
+                        <defs>
+                            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#f8f9fa"/>
+                                <stop offset="100%" style="stop-color:#e9ecef"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="800" height="600" fill="url(#bg)"/>
+                        
+                        <!-- Application Layer -->
+                        <rect x="50" y="50" width="660" height="100" rx="10" fill="#3498db" stroke="#2980b9" stroke-width="2"/>
+                        <text x="380" y="80" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Application Layer</text>
+                        <text x="380" y="105" text-anchor="middle" fill="white" font-size="12">• User Applications</text>
+                        <text x="380" y="120" text-anchor="middle" fill="white" font-size="12">• REST APIs</text>
+                        <text x="380" y="135" text-anchor="middle" fill="white" font-size="12">• CLI Tools</text>
+                        
+                        <!-- Agent Layer -->
+                        <rect x="50" y="180" width="200" height="120" rx="8" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                        <text x="150" y="210" text-anchor="middle" fill="white" font-size="14" font-weight="bold">AI Agents</text>
+                        <text x="150" y="235" text-anchor="middle" fill="white" font-size="11">• BaseAgent</text>
+                        <text x="150" y="250" text-anchor="middle" fill="white" font-size="11">• ConcreteAgent</text>
+                        <text x="150" y="265" text-anchor="middle" fill="white" font-size="11">• RAG Agent</text>
+                        <text x="150" y="280" text-anchor="middle" fill="white" font-size="11">• Observability</text>
+                        
+                        <!-- Workflow Engine -->
+                        <rect x="280" y="180" width="200" height="120" rx="8" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                        <text x="380" y="210" text-anchor="middle" fill="white" font-size="14" font-weight="bold">Workflow Engine</text>
+                        <text x="380" y="235" text-anchor="middle" fill="white" font-size="11">• Graph Execution</text>
+                        <text x="380" y="250" text-anchor="middle" fill="white" font-size="11">• State Management</text>
+                        <text x="380" y="265" text-anchor="middle" fill="white" font-size="11">• Pause/Resume</text>
+                        <text x="380" y="280" text-anchor="middle" fill="white" font-size="11">• Mermaid Export</text>
+                        
+                        <!-- Tools & MCP -->
+                        <rect x="510" y="180" width="200" height="120" rx="8" fill="#f39c12" stroke="#e67e22" stroke-width="2"/>
+                        <text x="610" y="210" text-anchor="middle" fill="white" font-size="14" font-weight="bold">Tools & MCP</text>
+                        <text x="610" y="235" text-anchor="middle" fill="white" font-size="11">• Tool Framework</text>
+                        <text x="610" y="250" text-anchor="middle" fill="white" font-size="11">• MCP Client</text>
+                        <text x="610" y="265" text-anchor="middle" fill="white" font-size="11">• Stdio Transport</text>
+                        <text x="610" y="280" text-anchor="middle" fill="white" font-size="11">• Tool Execution</text>
+                        
+                        <!-- Provider Layer -->
+                        <rect x="50" y="330" width="300" height="100" rx="8" fill="#27ae60" stroke="#229954" stroke-width="2"/>
+                        <text x="200" y="360" text-anchor="middle" fill="white" font-size="14" font-weight="bold">AI Provider Layer</text>
+                        <text x="200" y="380" text-anchor="middle" fill="white" font-size="11">• OpenAI • Anthropic</text>
+                        <text x="200" y="395" text-anchor="middle" fill="white" font-size="11">• Gemini • Mistral</text>
+                        <text x="200" y="410" text-anchor="middle" fill="white" font-size="11">• Ollama • DeepSeek</text>
+                        
+                        <!-- RAG Components -->
+                        <rect x="410" y="330" width="300" height="100" rx="8" fill="#2ecc71" stroke="#27ae60" stroke-width="2"/>
+                        <text x="570" y="355" text-anchor="middle" fill="white" font-size="14" font-weight="bold">RAG Components</text>
+                        <text x="570" y="375" text-anchor="middle" fill="white" font-size="11">• Document Loaders</text>
+                        <text x="570" y="390" text-anchor="middle" fill="white" font-size="11">• Embeddings</text>
+                        <text x="570" y="405" text-anchor="middle" fill="white" font-size="11">• Vector Stores</text>
+                        <text x="570" y="420" text-anchor="middle" fill="white" font-size="11">• Post-Processing</text>
+                        
+                        <!-- Storage Layer -->
+                        <rect x="50" y="460" width="660" height="100" rx="8" fill="#34495e" stroke="#2c3e50" stroke-width="2"/>
+                        <text x="400" y="490" text-anchor="middle" fill="white" font-size="14" font-weight="bold">Storage & Persistence Layer</text>
+                        <text x="400" y="515" text-anchor="middle" fill="white" font-size="11">Chat History • Vector Databases • Workflow State • File Systems</text>
+                        <text x="400" y="535" text-anchor="middle" fill="white" font-size="11">Memory • File • ChromaDB • Elasticsearch • Pinecone</text>
+                        
+                        <!-- Arrows -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#2c3e50"/>
+                            </marker>
+                        </defs>
+                        
+                        <!-- Application to Components -->
+                        <line x1="150" y1="150" x2="150" y2="180" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="380" y1="150" x2="380" y2="180" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="610" y1="150" x2="610" y2="180" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Components to Providers/RAG -->
+                        <line x1="150" y1="300" x2="200" y2="330" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="380" y1="300" x2="380" y2="460" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="610" y1="300" x2="590" y2="330" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Providers/RAG to Storage -->
+                        <line x1="225" y1="430" x2="300" y2="460" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="590" y1="430" x2="500" y2="460" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    </svg>
+                </div>
+                
+                <h3>🔄 Data Flow</h3>
+                <ol>
+                    <li><strong>Request Processing:</strong> Applications send requests through the Agent layer</li>
+                    <li><strong>Provider Selection:</strong> Agents route to appropriate AI providers</li>
+                    <li><strong>Tool Integration:</strong> MCP tools are invoked as needed</li>
+                    <li><strong>RAG Enhancement:</strong> Document retrieval augments responses</li>
+                    <li><strong>Workflow Orchestration:</strong> Complex processes managed by workflow engine</li>
+                    <li><strong>State Persistence:</strong> All state saved to configured storage backends</li>
+                </ol>
+            </section>
+            
+            <section id="quickstart">
+                <h2>🚀 Quick Start Guide</h2>
+                
+                <h3>📦 Dependencies</h3>
+                <div class="code-block" data-lang="maven">
+<pre>&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.skanga&lt;/groupId&gt;
+        &lt;artifactId&gt;mcp-framework&lt;/artifactId&gt;
+        &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    
+    &lt;!-- Optional: For specific providers --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.pdfbox&lt;/groupId&gt;
+        &lt;artifactId&gt;pdfbox&lt;/artifactId&gt;
+        &lt;version&gt;3.0.1&lt;/version&gt;
+    &lt;/dependency&gt;
+    
+    &lt;dependency&gt;
+        &lt;groupId&gt;co.elastic.clients&lt;/groupId&gt;
+        &lt;artifactId&gt;elasticsearch-java&lt;/artifactId&gt;
+        &lt;version&gt;8.11.0&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</pre>
+                </div>
+                
+                <h3>⚡ 5-Minute Setup</h3>
+                
+                <h4>1. Basic AI Agent</h4>
+                <div class="code-block" data-lang="java">
+<pre>import com.skanga.core.ConcreteAgent;
+import com.skanga.providers.openai.OpenAIProvider;
+import com.skanga.chat.history.InMemoryChatHistory;
+import com.skanga.core.messages.MessageRequest;
+import com.skanga.chat.messages.Message;
+import com.skanga.chat.enums.MessageRole;
+
+public class QuickStart {
+    public static void main(String[] args) {
+        // 1. Create AI provider
+        var provider = new OpenAIProvider("your-api-key", "gpt-4");
+        
+        // 2. Create agent with chat history
+        var agent = ConcreteAgent.make()
+            .withProvider(provider)
+            .withChatHistory(new InMemoryChatHistory(100))
+            .withInstructions("You are a helpful assistant.");
+            
+        // 3. Send a message
+        var userMessage = new Message(MessageRole.USER, "Hello! What can you help me with?");
+        var response = agent.chat(new MessageRequest(userMessage));
+        
+        System.out.println("AI Response: " + response.getContent());
+    }
+}</pre>
+                </div>
+                
+                <h4>2. Streaming Responses</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Stream response for real-time output
+agent.stream(new MessageRequest(userMessage))
+    .forEach(chunk -> {
+        System.out.print(chunk);
+        System.out.flush();
+    });</pre>
+                </div>
+                
+                <h4>3. Structured Output</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Define response structure
+public record WeatherInfo(String location, int temperature, String conditions) {}
+
+// Get structured response
+var weatherQuery = new Message(MessageRole.USER, "What's the weather in New York?");
+var weather = agent.structured(new MessageRequest(weatherQuery), WeatherInfo.class, 3);
+
+System.out.println("Temperature: " + weather.temperature() + "°F");</pre>
+                </div>
+                
+                <div class="tip">
+                    <strong>💡 Pro Tip:</strong> Always use try-with-resources when working with agents:
+                    <br><code>try (var agent = ConcreteAgent.make()...) { /* your code */ }</code>
+                </div>
+            </section>
+            
+            <section id="agents">
+                <h2>🤖 AI Agents</h2>
+                
+                <h3>🎛️ Provider Configuration</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Class</th>
+                            <th>Features</th>
+                            <th>Setup</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>OpenAI</td>
+                            <td>OpenAIProvider</td>
+                            <td>GPT-4, Vision, Tools</td>
+                            <td>API Key</td>
+                        </tr>
+                        <tr>
+                            <td>Anthropic</td>
+                            <td>AnthropicProvider</td>
+                            <td>Claude, Vision, Tools</td>
+                            <td>API Key</td>
+                        </tr>
+                        <tr>
+                            <td>Google</td>
+                            <td>GeminiProvider</td>
+                            <td>Gemini, Vision, Tools</td>
+                            <td>API Key</td>
+                        </tr>
+                        <tr>
+                            <td>Ollama</td>
+                            <td>OllamaProvider</td>
+                            <td>Local models, Tools</td>
+                            <td>Local server</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4>OpenAI Configuration</h4>
+                <div class="code-block" data-lang="java">
+<pre>var openaiProvider = new OpenAIProvider("sk-...", "gpt-4")
+    .systemPrompt("You are a coding assistant.")
+    .setTools(Arrays.asList(calculatorTool, webSearchTool));</pre>
+                </div>
+                
+                <h4>Anthropic with Custom Parameters</h4>
+                <div class="code-block" data-lang="java">
+<pre>var anthropicProvider = new AnthropicProvider("sk-ant-...", "claude-3-sonnet-20240229")
+    .withParameter("max_tokens", 4096)
+    .withParameter("temperature", 0.7);</pre>
+                </div>
+                
+                <h4>Ollama Local Setup</h4>
+                <div class="code-block" data-lang="java">
+<pre>var ollamaProvider = new OllamaProvider("http://localhost:11434", "llama2")
+    .withParameter("temperature", 0.8)
+    .withParameter("top_p", 0.9);</pre>
+                </div>
+                
+                <h3>💬 Chat History Management</h3>
+                
+                <h4>Memory-based (Development)</h4>
+                <div class="code-block" data-lang="java">
+<pre>var memoryHistory = new InMemoryChatHistory(100); // Keep last 100 messages</pre>
+                </div>
+                
+                <h4>File-based (Production)</h4>
+                <div class="code-block" data-lang="java">
+<pre>var fileHistory = new FileChatHistory(50, "/app/chat-logs", "session-123.jsonl");</pre>
+                </div>
+                
+                <h3>👀 Observability & Monitoring</h3>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Add logging observer
+agent.addObserver(new LoggingObserver(), "*");
+
+// Add OpenTelemetry monitoring
+var tracer = GlobalOpenTelemetry.getTracer("my-app");
+agent.addObserver(new OpenTelemetryAgentMonitor(tracer), "*");
+
+// Custom observer for specific events
+agent.addObserver((eventType, data) -> {
+    if ("error".equals(eventType)) {
+        // Handle errors
+        logger.error("Agent error: {}", data);
+    }
+}, "error");</pre>
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Memory Management:</strong> Always remove observers when done:
+                    <br><code>agent.removeAllObservers();</code> or use try-with-resources
+                </div>
+            </section>
+            
+            <section id="rag">
+                <h2>📚 RAG (Retrieval-Augmented Generation)</h2>
+                
+                <h3>🏗️ RAG Architecture</h3>
+                
+                <div class="architecture-diagram">
+                    <svg width="700" height="400" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Document Loading -->
+                        <rect x="50" y="50" width="120" height="80" rx="8" fill="#3498db" stroke="#2980b9" stroke-width="2"/>
+                        <text x="110" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Document</text>
+                        <text x="110" y="100" text-anchor="middle" fill="white" font-size="12">Loading</text>
+                        
+                        <!-- Text Splitting -->
+                        <rect x="200" y="50" width="120" height="80" rx="8" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                        <text x="260" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Text</text>
+                        <text x="260" y="100" text-anchor="middle" fill="white" font-size="12">Splitting</text>
+                        
+                        <!-- Embedding -->
+                        <rect x="350" y="50" width="120" height="80" rx="8" fill="#f39c12" stroke="#e67e22" stroke-width="2"/>
+                        <text x="410" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Embedding</text>
+                        <text x="410" y="100" text-anchor="middle" fill="white" font-size="12">Generation</text>
+                        
+                        <!-- Vector Storage -->
+                        <rect x="500" y="50" width="120" height="80" rx="8" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                        <text x="560" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Vector</text>
+                        <text x="560" y="100" text-anchor="middle" fill="white" font-size="12">Storage</text>
+                        
+                        <!-- Query Processing -->
+                        <rect x="50" y="200" width="120" height="80" rx="8" fill="#27ae60" stroke="#229954" stroke-width="2"/>
+                        <text x="110" y="230" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Query</text>
+                        <text x="110" y="250" text-anchor="middle" fill="white" font-size="12">Processing</text>
+                        
+                        <!-- Similarity Search -->
+                        <rect x="200" y="200" width="120" height="80" rx="8" fill="#2ecc71" stroke="#27ae60" stroke-width="2"/>
+                        <text x="260" y="230" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Similarity</text>
+                        <text x="260" y="250" text-anchor="middle" fill="white" font-size="12">Search</text>
+                        
+                        <!-- Post Processing -->
+                        <rect x="350" y="200" width="120" height="80" rx="8" fill="#34495e" stroke="#2c3e50" stroke-width="2"/>
+                        <text x="410" y="230" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Post</text>
+                        <text x="410" y="250" text-anchor="middle" fill="white" font-size="12">Processing</text>
+                        
+                        <!-- Context Injection -->
+                        <rect x="500" y="200" width="120" height="80" rx="8" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
+                        <text x="560" y="230" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Context</text>
+                        <text x="560" y="250" text-anchor="middle" fill="white" font-size="12">Injection</text>
+                        
+                        <!-- Arrows for indexing flow -->
+                        <line x1="170" y1="90" x2="200" y2="90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="320" y1="90" x2="350" y2="90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="470" y1="90" x2="500" y2="90" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Arrows for query flow -->
+                        <line x1="170" y1="240" x2="200" y2="240" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="320" y1="240" x2="350" y2="240" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="470" y1="240" x2="500" y2="240" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Connection from storage to search -->
+                        <line x1="560" y1="130" x2="560" y2="150" stroke="#2c3e50" stroke-width="2"/>
+                        <line x1="560" y1="150" x2="260" y2="150" stroke="#2c3e50" stroke-width="2"/>
+                        <line x1="260" y1="150" x2="260" y2="200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Labels -->
+                        <text x="350" y="30" text-anchor="middle" fill="#2c3e50" font-size="14" font-weight="bold">Document Indexing Pipeline</text>
+                        <text x="350" y="320" text-anchor="middle" fill="#2c3e50" font-size="14" font-weight="bold">Query & Retrieval Pipeline</text>
+                    </svg>
+                </div>
+                
+                <h3>📁 Document Loading</h3>
+                
+                <h4>File System Loader</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Load documents from directory
+var loader = new FileSystemDocumentLoader(Paths.get("/documents"))
+    .withMaxDepth(3)  // Recursive depth
+    .withTextSplitter(new DelimiterTextSplitter(1000, "\n\n", 50));
+
+// Custom file readers
+Map&lt;String, FileReader&gt; customReaders = Map.of(
+    "docx", new DocxFileReader(),
+    "csv", new CsvFileReader()
+);
+var customLoader = new FileSystemDocumentLoader(path, customReaders, options);
+
+List&lt;Document&gt; documents = loader.getDocuments();</pre>
+                </div>
+                
+                <h4>String Document Loader</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Load from string content
+var stringLoader = new StringDocumentLoader("Your document content", "my-doc.txt")
+    .withTextSplitter(new DelimiterTextSplitter(500, "\n", 25));
+    
+List&lt;Document&gt; docs = stringLoader.getDocuments();</pre>
+                </div>
+                
+                <h3>🔢 Embedding Providers</h3>
+                
+                <h4>OpenAI Embeddings</h4>
+                <div class="code-block" data-lang="java">
+<pre>var embeddingProvider = new OpenAIEmbeddingProvider(
+    "sk-...", 
+    "text-embedding-3-large"  // or text-embedding-3-small
+).withDimensions(1536);</pre>
+                </div>
+                
+                <h4>Ollama Local Embeddings</h4>
+                <div class="code-block" data-lang="java">
+<pre>var ollamaEmbeddings = new OllamaEmbeddingProvider(
+    "http://localhost:11434",
+    "nomic-embed-text"
+);</pre>
+                </div>
+                
+                <h3>🗄️ Vector Stores</h3>
+                
+                <h4>ChromaDB (Recommended for Production)</h4>
+                <div class="code-block" data-lang="java">
+<pre>var vectorStore = new ChromaVectorStore(
+    "http://localhost:8000",
+    "my-collection",
+    10  // default top-k
+);</pre>
+                </div>
+                
+                <h4>Elasticsearch</h4>
+                <div class="code-block" data-lang="java">
+<pre>var esClient = ElasticsearchClient.builder()
+    .serverUrl("http://localhost:9200")
+    .build();
+    
+var vectorStore = new ElasticsearchVectorStore(esClient, "documents", 10);</pre>
+                </div>
+                
+                <h4>File-based (Development)</h4>
+                <div class="code-block" data-lang="java">
+<pre>var fileStore = new FileVectorStore("/data/vectors", "embeddings.jsonl", 10);</pre>
+                </div>
+                
+                <h4>Memory (Testing)</h4>
+                <div class="code-block" data-lang="java">
+<pre>var memoryStore = new MemoryVectorStore(10);</pre>
+                </div>
+                
+                <h3>🔄 Post-Processing</h3>
+                
+                <h4>Fixed Threshold Filter</h4>
+                <div class="code-block" data-lang="java">
+<pre>var thresholdProcessor = new FixedThresholdPostProcessor(0.7f);  // Keep docs with score ≥ 0.7</pre>
+                </div>
+                
+                <h4>Adaptive Threshold</h4>
+                <div class="code-block" data-lang="java">
+<pre>var adaptiveProcessor = new AdaptiveThresholdPostProcessor(
+    1.5,  // standard deviations above mean
+    3     // minimum documents to return
+);</pre>
+                </div>
+                
+                <h4>Cohere Reranker</h4>
+                <div class="code-block" data-lang="java">
+<pre>var cohereReranker = new CohereRerankerPostProcessor(
+    "your-cohere-api-key",
+    "rerank-english-v3.0",
+    5  // top-n results
+);</pre>
+                </div>
+                
+                <h3>🎯 Complete RAG Setup</h3>
+                
+                <div class="code-block" data-lang="java">
+<pre>// 1. Setup components
+var embeddingProvider = new OpenAIEmbeddingProvider("sk-...", "text-embedding-3-large");
+var vectorStore = new ChromaVectorStore("http://localhost:8000", "knowledge-base", 10);
+var aiProvider = new OpenAIProvider("sk-...", "gpt-4");
+
+// 2. Create RAG agent
+var ragAgent = new RAG(embeddingProvider, vectorStore)
+    .withProvider(aiProvider)
+    .withChatHistory(new InMemoryChatHistory(50))
+    .withInstructions("You are a knowledgeable assistant. Use the provided context to answer questions accurately.")
+    .setTopK(5)
+    .addPostProcessor(new AdaptiveThresholdPostProcessor(1.0, 2))
+    .addPostProcessor(new CohereRerankerPostProcessor("cohere-key", "rerank-english-v3.0", 3));
+
+// 3. Load and index documents
+var loader = new FileSystemDocumentLoader(Paths.get("/knowledge-base"))
+    .withTextSplitter(new DelimiterTextSplitter(1000, "\n\n", 100));
+    
+List&lt;Document&gt; documents = loader.getDocuments();
+ragAgent.addDocuments(documents);
+
+// 4. Query the knowledge base
+var question = new Message(MessageRole.USER, "What are the key features of the product?");
+var answer = ragAgent.answer(question);
+
+System.out.println("Answer: " + answer.getContent());</pre>
+                </div>
+                
+                <div class="tip">
+                    <strong>💡 RAG Best Practices:</strong>
+                    <ul>
+                        <li>Use chunk sizes of 500-1500 characters depending on content type</li>
+                        <li>Add 50-200 character overlap between chunks</li>
+                        <li>Experiment with different embedding models for your domain</li>
+                        <li>Use reranking for better relevance in production</li>
+                        <li>Monitor retrieval quality with observability tools</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="workflows">
+                <h2>⚡ Workflow Management</h2>
+                
+                <h3>🎯 Workflow Concepts</h3>
+                
+                <p>The workflow engine enables complex AI processes with branching logic, human-in-the-loop interactions, and state persistence.</p>
+                
+                <h4>Basic Workflow Structure</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Create custom nodes
+public class DataProcessingNode extends AbstractNode {
+    public DataProcessingNode(String id) {
+        super(id);
+    }
+    
+    @Override
+    public WorkflowState run(WorkflowContext context) throws WorkflowInterrupt {
+        var state = context.getCurrentState();
+        
+        // Process data
+        var inputData = (String) state.get("input_data");
+        var processedData = processData(inputData);
+        
+        // Update state
+        state.put("processed_data", processedData);
+        state.put("processing_complete", true);
+        
+        return state;
+    }
+    
+    private String processData(String input) {
+        // Your processing logic
+        return input.toUpperCase();
+    }
+}
+
+// Human approval node with interrupt
+public class ApprovalNode extends AbstractNode {
+    public ApprovalNode(String id) {
+        super(id);
+    }
+    
+    @Override
+    public WorkflowState run(WorkflowContext context) throws WorkflowInterrupt {
+        var state = context.getCurrentState();
+        
+        if (context.isResuming()) {
+            // Handle human feedback
+            var approval = (Boolean) context.getFeedbackForNode();
+            state.put("approved", approval);
+            return state;
+        }
+        
+        // Request human approval
+        var dataToSave = Map.of(
+            "approval_request", "Please review the processed data",
+            "data_for_review", state.get("processed_data")
+        );
+        
+        context.interrupt(dataToSave);
+        return state; // Never reached
+    }
+}</pre>
+                </div>
+                
+                <h4>Building and Running Workflows</h4>
+                <div class="code-block" data-lang="java">
+<pre>// 1. Create workflow
+var workflow = new Workflow("data-processing-workflow")
+    .addNode(new DataProcessingNode("process"))
+    .addNode(new ApprovalNode("approve"))
+    .addNode(new FinalizeNode("finalize"))
+    .setStartNodeId("process")
+    .setEndNodeId("finalize");
+
+// 2. Add conditional edges
+workflow.addEdge("process", "approve", 
+    state -> (Boolean) state.get("processing_complete"))
+    
+.addEdge("approve", "finalize",
+    state -> (Boolean) state.get("approved"))
+    
+.addEdge("approve", "process",  // Loop back if not approved
+    state -> !(Boolean) state.get("approved"));
+
+// 3. Run workflow
+var initialState = new WorkflowState();
+initialState.put("input_data", "hello world");
+
+try {
+    var finalState = workflow.run(initialState);
+    System.out.println("Workflow completed: " + finalState.get("final_result"));
+} catch (WorkflowInterrupt interrupt) {
+    System.out.println("Workflow paused for human input");
+    
+    // Later, resume with human feedback
+    var finalState = workflow.resume(true); // User approved
+    System.out.println("Workflow resumed and completed");
+}</pre>
+                </div>
+                
+                <h3>🎨 Workflow Visualization</h3>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Export to Mermaid diagram
+var exporter = new MermaidExporter("TD");  // Top-Down direction
+String mermaidDiagram = exporter.export(workflow);
+
+System.out.println(mermaidDiagram);
+// Output:
+// graph TD;
+//     process["DataProcessingNode::process"];
+//     approve["ApprovalNode::approve"];
+//     finalize["FinalizeNode::finalize"];
+//     
+//     process -->|Conditional| approve;
+//     approve -->|Conditional| finalize;
+//     approve -->|Conditional| process;</pre>
+                </div>
+                
+                <h3>💾 Persistence & Recovery</h3>
+                
+                <h4>File-based Persistence</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Custom persistence implementation
+public class FilePersistence implements WorkflowPersistence {
+    private final Path storageDir;
+    
+    public FilePersistence(String directory) {
+        this.storageDir = Paths.get(directory);
+    }
+    
+    @Override
+    public void save(String workflowId, WorkflowInterrupt interrupt) throws WorkflowPersistenceException {
+        try {
+            var file = storageDir.resolve(workflowId + ".json");
+            var json = new ObjectMapper().writeValueAsString(interrupt);
+            Files.writeString(file, json);
+        } catch (Exception e) {
+            throw new WorkflowPersistenceException("Failed to save workflow state", e);
+        }
+    }
+    
+    @Override
+    public WorkflowInterrupt load(String workflowId) throws WorkflowPersistenceException {
+        try {
+            var file = storageDir.resolve(workflowId + ".json");
+            if (!Files.exists(file)) return null;
+            
+            var json = Files.readString(file);
+            return new ObjectMapper().readValue(json, WorkflowInterrupt.class);
+        } catch (Exception e) {
+            throw new WorkflowPersistenceException("Failed to load workflow state", e);
+        }
+    }
+    
+    @Override
+    public void delete(String workflowId) throws WorkflowPersistenceException {
+        try {
+            Files.deleteIfExists(storageDir.resolve(workflowId + ".json"));
+        } catch (Exception e) {
+            throw new WorkflowPersistenceException("Failed to delete workflow state", e);
+        }
+    }
+}
+
+// Use custom persistence
+var persistence = new FilePersistence("/app/workflow-state");
+var workflow = new Workflow("my-workflow", persistence);</pre>
+                </div>
+                
+                <h3>🔄 Advanced Workflow Patterns</h3>
+                
+                <h4>Parallel Processing</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Fork-join pattern
+workflow.addNode(new ForkNode("fork"))
+    .addNode(new ProcessingTaskA("taskA"))
+    .addNode(new ProcessingTaskB("taskB"))
+    .addNode(new JoinNode("join"))
+    
+    .addEdge("fork", "taskA")
+    .addEdge("fork", "taskB")
+    .addEdge("taskA", "join", state -> state.containsKey("taskA_complete"))
+    .addEdge("taskB", "join", state -> state.containsKey("taskB_complete"));</pre>
+                </div>
+                
+                <h4>Error Handling & Retry</h4>
+                <div class="code-block" data-lang="java">
+<pre>public class RetryNode extends AbstractNode {
+    private final int maxRetries;
+    
+    public RetryNode(String id, int maxRetries) {
+        super(id);
+        this.maxRetries = maxRetries;
+    }
+    
+    @Override
+    public WorkflowState run(WorkflowContext context) throws WorkflowInterrupt {
+        var state = context.getCurrentState();
+        int attempts = state.getOrDefault("retry_attempts", 0);
+        
+        try {
+            // Risky operation
+            performRiskyOperation(state);
+            state.put("success", true);
+        } catch (Exception e) {
+            attempts++;
+            state.put("retry_attempts", attempts);
+            
+            if (attempts >= maxRetries) {
+                state.put("failed", true);
+                state.put("error", e.getMessage());
+            }
+        }
+        
+        return state;
+    }
+}</pre>
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Workflow Limits:</strong> The framework includes cycle detection and execution step limits to prevent infinite loops. Maximum steps = nodes × 10.
+                </div>
+            </section>
+            
+            <section id="tools">
+                <h2>🔧 Tools & MCP Integration</h2>
+                
+                <h3>🛠️ Creating Custom Tools</h3>
+                
+                <h4>Simple Function Tool</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Create a calculator tool
+var calculatorTool = new BaseTool("calculator", "Perform basic mathematical calculations")
+    .addParameter("operation", PropertyType.STRING, "The operation to perform", true)
+    .addParameter("a", PropertyType.NUMBER, "First number", true)
+    .addParameter("b", PropertyType.NUMBER, "Second number", true)
+    .setCallable(input -> {
+        String operation = (String) input.getArgument("operation");
+        double a = ((Number) input.getArgument("a")).doubleValue();
+        double b = ((Number) input.getArgument("b")).doubleValue();
+        
+        double result = switch(operation.toLowerCase()) {
+            case "add" -> a + b;
+            case "subtract" -> a - b;
+            case "multiply" -> a * b;
+            case "divide" -> a / b;
+            default -> throw new ToolCallableException("Unknown operation: " + operation);
+        };
+        
+        return new ToolExecutionResult(result);
+    });</pre>
+                </div>
+                
+                <h4>Complex Tool with Object Parameters</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Web search tool with structured parameters
+var webSearchTool = new BaseTool("web_search", "Search the web for information")
+    .addParameter("query", PropertyType.STRING, "Search query", true)
+    .addParameter("max_results", PropertyType.INTEGER, "Maximum results to return", false)
+    .addParameter(new ObjectToolProperty("filters", "Search filters", false,
+        Arrays.asList(
+            new BaseToolProperty("language", PropertyType.STRING, "Language code", false) {},
+            new BaseToolProperty("date_range", PropertyType.STRING, "Date range filter", false) {}
+        ), null))
+    .setCallable(input -> {
+        String query = (String) input.getArgument("query");
+        int maxResults = input.getArgumentOrDefault("max_results", 10);
+        
+        // Perform web search (implementation details omitted)
+        var results = performWebSearch(query, maxResults);
+        
+        return new ToolExecutionResult(Map.of(
+            "query", query,
+            "results", results,
+            "count", results.size()
+        ));
+    });</pre>
+                </div>
+                
+                <h3>🔌 MCP (Model Context Protocol) Integration</h3>
+                
+                <h4>Connecting to MCP Servers</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Configure MCP server
+Map&lt;String, Object&gt; mcpConfig = Map.of(
+    "command", "npx",
+    "args", Arrays.asList("@modelcontextprotocol/server-filesystem", "/Users/username/Documents"),
+    "env", Map.of("NODE_ENV", "production")
+);
+
+// Create MCP connector
+var mcpConnector = new McpConnector(mcpConfig);
+
+// Get available tools from MCP server
+List&lt;Tool&gt; mcpTools = mcpConnector.getTools();
+System.out.println("Available MCP tools: " + mcpTools.size());
+
+// Use MCP tools with agent
+var agent = ConcreteAgent.make()
+    .withProvider(openaiProvider)
+    .addTool(mcpTools.get(0));  // Add specific tool
+
+// Or add all MCP tools
+mcpTools.forEach(agent::addTool);</pre>
+                </div>
+                
+                <h4>Custom MCP Transport</h4>
+                <div class="code-block" data-lang="java">
+<pre>// WebSocket MCP transport (example)
+public class WebSocketMcpTransport implements McpTransport {
+    private WebSocket webSocket;
+    private final BlockingQueue&lt;Map&lt;String, Object&gt;&gt; messageQueue = new LinkedBlockingQueue&lt;&gt;();
+    
+    @Override
+    public void connect() throws McpException {
+        try {
+            this.webSocket = HttpClient.newHttpClient()
+                .newWebSocketBuilder()
+                .buildAsync(URI.create("ws://localhost:8080/mcp"), 
+                    new WebSocketListener(messageQueue))
+                .join();
+        } catch (Exception e) {
+            throw new McpException("Failed to connect via WebSocket", e);
+        }
+    }
+    
+    @Override
+    public void send(Map&lt;String, Object&gt; data) throws McpException {
+        try {
+            String json = new ObjectMapper().writeValueAsString(data);
+            webSocket.sendText(json, true);
+        } catch (Exception e) {
+            throw new McpException("Failed to send WebSocket message", e);
+        }
+    }
+    
+    @Override
+    public Map&lt;String, Object&gt; receive() throws McpException {
+        try {
+            return messageQueue.take(); // Block until message received
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new McpException("WebSocket receive interrupted", e);
+        }
+    }
+    
+    // ... other methods
+}
+
+// Use custom transport
+var customTransport = new WebSocketMcpTransport();
+var mcpClient = new McpClient(customTransport);
+var mcpConnector = new McpConnector(mcpClient);</pre>
+                </div>
+                
+                <h3>🎯 Tool Usage in Agents</h3>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Create agent with multiple tools
+var agent = ConcreteAgent.make()
+    .withProvider(anthropicProvider)
+    .withInstructions("You have access to a calculator and web search. Use them to help answer questions.")
+    .addTool(calculatorTool)
+    .addTool(webSearchTool);
+
+// Agent will automatically use tools when needed
+var query = new Message(MessageRole.USER, 
+    "What's 15 * 23? Also, search for the latest news about artificial intelligence.");
+    
+var response = agent.chat(new MessageRequest(query));
+System.out.println(response.getContent());</pre>
+                </div>
+                
+                <div class="tip">
+                    <strong>💡 Tool Development Tips:</strong>
+                    <ul>
+                        <li>Always validate input parameters thoroughly</li>
+                        <li>Use descriptive tool and parameter names</li>
+                        <li>Provide clear error messages for failures</li>
+                        <li>Consider rate limiting for external API calls</li>
+                        <li>Use structured returns for complex data</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="troubleshooting">
+                <h2>🔍 Troubleshooting</h2>
+                
+                <h3>🚨 Common Issues</h3>
+                
+                <div class="error">
+                    <strong>❌ ProviderException: API request failed (401)</strong>
+                    <br><strong>Solution:</strong> Check your API key configuration and ensure it's valid for the selected provider.
+                </div>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Debug API key issues
+var provider = new OpenAIProvider(apiKey, model);
+try {
+    var testMessage = new Message(MessageRole.USER, "Hello");
+    provider.chat(Arrays.asList(testMessage));
+} catch (ProviderException e) {
+    System.err.println("Status Code: " + e.getStatusCode());
+    System.err.println("Error Body: " + e.getErrorBody());
+}</pre>
+                </div>
+                
+                <div class="error">
+                    <strong>❌ McpException: Process failed to start</strong>
+                    <br><strong>Solution:</strong> Verify the MCP server command and ensure the executable is in your PATH.
+                </div>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Test MCP server manually first
+ProcessBuilder pb = new ProcessBuilder("npx", "@modelcontextprotocol/server-filesystem", "/path");
+pb.environment().putAll(System.getenv());
+Process process = pb.start();
+
+// Check if process starts successfully
+if (process.isAlive()) {
+    System.out.println("MCP server started successfully");
+} else {
+    System.err.println("MCP server failed to start: " + process.exitValue());
+}</pre>
+                </div>
+                
+                <div class="error">
+                    <strong>❌ VectorStoreException: Embedding dimensions don't match</strong>
+                    <br><strong>Solution:</strong> Ensure all documents use the same embedding model/dimensions.
+                </div>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Check embedding dimensions
+var embedding1 = embeddingProvider.embedText("test 1");
+var embedding2 = embeddingProvider.embedText("test 2");
+
+System.out.println("Embedding 1 dimensions: " + embedding1.size());
+System.out.println("Embedding 2 dimensions: " + embedding2.size());
+
+// Clear vector store if dimensions changed
+vectorStore.clear(); // If supported
+// Re-index documents with correct embeddings</pre>
+                </div>
+                
+                <div class="error">
+                    <strong>❌ WorkflowException: Cycle detected in workflow graph</strong>
+                    <br><strong>Solution:</strong> Review your workflow edges to ensure no infinite loops exist.
+                </div>
+                
+                <div class="code-block" data-lang="java">
+<pre>// Debug workflow structure
+workflow.getEdges().forEach(edge -> 
+    System.out.println(edge.getFromNodeId() + " -> " + edge.getToNodeId()));
+
+// Use visualization to identify cycles
+var mermaidDiagram = new MermaidExporter().export(workflow);
+System.out.println(mermaidDiagram);</pre>
+                </div>
+                
+                <h3>🔧 Performance Issues</h3>
+                
+                <h4>Memory Usage Optimization</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Monitor memory usage
+Runtime runtime = Runtime.getRuntime();
+long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
+
+// Your operations...
+
+long memoryAfter = runtime.totalMemory() - runtime.freeMemory();
+System.out.println("Memory used: " + (memoryAfter - memoryBefore) / 1024 / 1024 + " MB");
+
+// Optimize chat history size
+var chatHistory = new InMemoryChatHistory(20); // Smaller context window
+
+// Use streaming for large responses
+agent.stream(request).forEach(chunk -> {
+    processChunk(chunk);  // Process incrementally
+});</pre>
+                </div>
+                
+                <h4>Connection Timeouts</h4>
+                <div class="code-block" data-lang="java">
+<pre>// Increase timeouts for slow providers
+var httpClient = HttpClient.newBuilder()
+    .connectTimeout(Duration.ofSeconds(60))
+    .build();
+
+var provider = new OpenAIProvider(apiKey, model).setHttpClient(httpClient);
+
+// Retry logic for transient failures
+int maxRetries = 3;
+for (int i = 0; i < maxRetries; i++) {
+    try {
+        var response = agent.chat(request);
+        break; // Success
+    } catch (ProviderException e) {
+        if (i == maxRetries - 1) throw e; // Last attempt
+        if (e.isRetryable()) {
+            Thread.sleep(1000 * (i + 1)); // Exponential backoff
+        } else {
+            throw e; // Don't retry non-retryable errors
+        }
+    }
+}</pre>
+                </div>
+                
+        <section id="debugging">
+            <h3>🔍 Debugging & Logging</h3>
+            
+            <h4>Enable Detailed Logging</h4>
+            <div class="code-block" data-lang="java">
+<pre>// Configure logging
+Logger rootLogger = LoggerFactory.getLogger("com.skanga");
+if (rootLogger instanceof ch.qos.logback.classic.Logger) {
+    ((ch.qos.logback.classic.Logger) rootLogger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+}
+
+// Add comprehensive logging observer
+agent.addObserver(new LoggingObserver(LoggerFactory.getLogger("agent")), "*");
+
+// Custom debug observer
+agent.addObserver((eventType, data) -> {
+    System.out.println("[DEBUG] Event: " + eventType + ", Data: " + data);
+}, "*");</pre>
+            </div>
+            
+            <h4>Request/Response Inspection</h4>
+            <div class="code-block" data-lang="java">
+<pre>// Log all HTTP requests/responses
+var debugHttpClient = HttpClient.newBuilder()
+    .connectTimeout(Duration.ofSeconds(30))
+    .build();
+
+// Custom provider with request logging
+public class DebuggingOpenAIProvider extends OpenAIProvider {
+    public DebuggingOpenAIProvider(String apiKey, String model) {
+        super(apiKey, model);
+    }
+    
+    @Override
+    public CompletableFuture&lt;Message&gt; chatAsync(List&lt;Message&gt; messages, String instructions, List&lt;Object&gt; tools) {
+        System.out.println("=== REQUEST ===");
+        System.out.println("Messages: " + messages.size());
+        System.out.println("Instructions: " + instructions);
+        System.out.println("Tools: " + tools.size());
+        
+        return super.chatAsync(messages, instructions, tools)
+            .whenComplete((response, throwable) -> {
+                System.out.println("=== RESPONSE ===");
+                if (throwable != null) {
+                    System.err.println("Error: " + throwable.getMessage());
+                } else {
+                    System.out.println("Content: " + response.getContent());
+                    System.out.println("Usage: " + response.getUsage());
+                }
+            });
+    }
+}</pre>
+            </div>
+            
+            <h3>📊 Health Checks</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>// Create health check utility
+public class HealthChecker {
+    
+    public static boolean checkProviderHealth(AIProvider provider) {
+        try {
+            var testMessage = new Message(MessageRole.USER, "ping");
+            var response = provider.chat(Arrays.asList(testMessage));
+            return response != null && response.getContent() != null;
+        } catch (Exception e) {
+            System.err.println("Provider health check failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public static boolean checkVectorStoreHealth(VectorStore vectorStore) {
+        try {
+            // Test with dummy embedding
+            var testEmbedding = IntStream.range(0, 1536)
+                .mapToDouble(i -> Math.random())
+                .boxed()
+                .collect(Collectors.toList());
+            
+            var results = vectorStore.similaritySearch(testEmbedding, 1);
+            return true; // No exception means it's working
+        } catch (Exception e) {
+            System.err.println("Vector store health check failed: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public static boolean checkMcpServerHealth(McpConnector connector) {
+        try {
+            var tools = connector.getTools();
+            return tools != null;
+        } catch (Exception e) {
+            System.err.println("MCP server health check failed: " + e.getMessage());
+            return false;
+        }
+    }
+}
+
+// Run health checks
+System.out.println("Provider healthy: " + HealthChecker.checkProviderHealth(provider));
+System.out.println("Vector store healthy: " + HealthChecker.checkVectorStoreHealth(vectorStore));
+System.out.println("MCP server healthy: " + HealthChecker.checkMcpServerHealth(mcpConnector));</pre>
+            </div>
+        </section>
+        
+        <section id="examples">
+            <h2>💡 Advanced Examples</h2>
+            
+            <h3>🤖 Multi-Agent Conversation</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>// Create specialized agents
+var researchAgent = ConcreteAgent.make()
+    .withProvider(new OpenAIProvider("sk-...", "gpt-4"))
+    .withInstructions("You are a research specialist. Gather and synthesize information on given topics.")
+    .addTool(webSearchTool)
+    .addTool(wikipediaTool);
+
+var writingAgent = ConcreteAgent.make()
+    .withProvider(new AnthropicProvider("sk-ant-...", "claude-3-sonnet-20240229"))
+    .withInstructions("You are a skilled writer. Create engaging content based on research provided.");
+
+var reviewAgent = ConcreteAgent.make()
+    .withProvider(new OpenAIProvider("sk-...", "gpt-4"))
+    .withInstructions("You are an editor. Review content for accuracy, clarity, and engagement.");
+
+// Orchestrate multi-agent workflow
+public class ContentCreationWorkflow {
+    
+    public String createArticle(String topic) {
+        // Step 1: Research
+        var researchQuery = new Message(MessageRole.USER, 
+            "Research the topic: " + topic + ". Provide key facts, recent developments, and notable statistics.");
+        var researchResult = researchAgent.chat(new MessageRequest(researchQuery));
+        
+        // Step 2: Writing
+        var writingQuery = new Message(MessageRole.USER,
+            "Write a 500-word article about " + topic + " based on this research: " + researchResult.getContent());
+        var article = writingAgent.chat(new MessageRequest(writingQuery));
+        
+        // Step 3: Review and edit
+        var reviewQuery = new Message(MessageRole.USER,
+            "Review and suggest improvements for this article: " + article.getContent());
+        var review = reviewAgent.chat(new MessageRequest(reviewQuery));
+        
+        // Step 4: Final revision
+        var revisionQuery = new Message(MessageRole.USER,
+            "Apply these review suggestions to improve the article: " + review.getContent() + 
+            "\n\nOriginal article: " + article.getContent());
+        var finalArticle = writingAgent.chat(new MessageRequest(revisionQuery));
+        
+        return finalArticle.getContent().toString();
+    }
+}
+
+// Usage
+var workflow = new ContentCreationWorkflow();
+var article = workflow.createArticle("The Future of Quantum Computing");
+System.out.println(article);</pre>
+            </div>
+            
+            <h3>📚 Intelligent Document Q&A System</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>public class DocumentQASystem {
+    private final RAG ragAgent;
+    private final Map&lt;String, String&gt; documentSources = new HashMap&lt;&gt;();
+    
+    public DocumentQASystem() {
+        // Setup RAG with multiple post-processors
+        this.ragAgent = new RAG(
+            new OpenAIEmbeddingProvider("sk-...", "text-embedding-3-large"),
+            new ChromaVectorStore("http://localhost:8000", "documents", 10)
+        )
+        .withProvider(new OpenAIProvider("sk-...", "gpt-4"))
+        .withInstructions("""
+            You are an intelligent document assistant. Answer questions based on the provided context.
+            Always cite your sources and indicate confidence levels in your answers.
+            If the context doesn't contain enough information, say so clearly.
+            """)
+        .setTopK(8)
+        .addPostProcessor(new AdaptiveThresholdPostProcessor(1.0, 3))
+        .addPostProcessor(new CohereRerankerPostProcessor("cohere-key", "rerank-english-v3.0", 5));
+    }
+    
+    public void addDocuments(Path documentPath) throws IOException {
+        var loader = new FileSystemDocumentLoader(documentPath)
+            .withTextSplitter(new DelimiterTextSplitter(800, "\n\n", 100));
+            
+        var documents = loader.getDocuments();
+        
+        // Track document sources
+        documents.forEach(doc -> 
+            documentSources.put(doc.getId(), doc.getSourceName()));
+            
+        ragAgent.addDocuments(documents);
+        System.out.println("Indexed " + documents.size() + " document chunks");
+    }
+    
+    public QAResponse askQuestion(String question) {
+        var questionMsg = new Message(MessageRole.USER, question);
+        
+        // Add conversation context for follow-up questions
+        var enrichedQuestion = enrichQuestionWithContext(question);
+        var response = ragAgent.answer(new Message(MessageRole.USER, enrichedQuestion));
+        
+        // Extract cited sources
+        var citedSources = extractCitedSources(response.getContent().toString());
+        
+        return new QAResponse(
+            response.getContent().toString(),
+            citedSources,
+            ragAgent.getVectorStore().getClass().getSimpleName()
+        );
+    }
+    
+    private String enrichQuestionWithContext(String question) {
+        // Add context from previous questions if this looks like a follow-up
+        if (isFollowUpQuestion(question)) {
+            var chatHistory = ragAgent.resolveChatHistory();
+            var lastMessages = chatHistory.getMessages().stream()
+                .skip(Math.max(0, chatHistory.getMessages().size() - 4))
+                .collect(Collectors.toList());
+                
+            var context = lastMessages.stream()
+                .map(msg -> msg.getRole() + ": " + msg.getContent())
+                .collect(Collectors.joining("\n"));
+                
+            return "Previous conversation:\n" + context + "\n\nCurrent question: " + question;
+        }
+        return question;
+    }
+    
+    private boolean isFollowUpQuestion(String question) {
+        String[] followUpWords = {"also", "what about", "how about", "and", "additionally"};
+        String lowerQuestion = question.toLowerCase();
+        return Arrays.stream(followUpWords).anyMatch(lowerQuestion::contains);
+    }
+    
+    private List&lt;String&gt; extractCitedSources(String response) {
+        // Extract document sources mentioned in the response
+        return documentSources.values().stream()
+            .filter(source -> response.contains(source) || 
+                response.contains(Paths.get(source).getFileName().toString()))
+            .distinct()
+            .collect(Collectors.toList());
+    }
+    
+    public record QAResponse(String answer, List&lt;String&gt; sources, String vectorStore) {}
+}
+
+// Usage
+var qaSystem = new DocumentQASystem();
+qaSystem.addDocuments(Paths.get("/company-docs"));
+
+var response1 = qaSystem.askQuestion("What is our company's return policy?");
+System.out.println("Answer: " + response1.answer());
+System.out.println("Sources: " + response1.sources());
+
+var response2 = qaSystem.askQuestion("What about international orders?");
+System.out.println("Follow-up Answer: " + response2.answer());</pre>
+            </div>
+            
+            <h3>⚡ Adaptive Workflow with AI Decision Making</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>// AI-powered decision node
+public class AIDecisionNode extends AbstractNode {
+    private final Agent decisionAgent;
+    private final String decisionPrompt;
+    
+    public AIDecisionNode(String id, Agent agent, String prompt) {
+        super(id);
+        this.decisionAgent = agent;
+        this.decisionPrompt = prompt;
+    }
+    
+    @Override
+    public WorkflowState run(WorkflowContext context) throws WorkflowInterrupt {
+        var state = context.getCurrentState();
+        
+        // Prepare context for AI decision
+        var contextData = state.getAll().entrySet().stream()
+            .map(entry -> entry.getKey() + ": " + entry.getValue())
+            .collect(Collectors.joining("\n"));
+            
+        var decisionQuery = decisionPrompt + "\n\nCurrent context:\n" + contextData;
+        
+        // Get AI decision
+        var response = decisionAgent.structured(
+            new MessageRequest(new Message(MessageRole.USER, decisionQuery)),
+            Decision.class,
+            3
+        );
+        
+        state.put("ai_decision", response.choice());
+        state.put("ai_confidence", response.confidence());
+        state.put("ai_reasoning", response.reasoning());
+        
+        return state;
+    }
+    
+    public record Decision(String choice, double confidence, String reasoning) {}
+}
+
+// Adaptive customer support workflow
+public class CustomerSupportWorkflow {
+    
+    public Workflow createWorkflow() {
+        var classificationAgent = ConcreteAgent.make()
+            .withProvider(new OpenAIProvider("sk-...", "gpt-4"))
+            .withInstructions("Classify customer inquiries and determine urgency levels.");
+            
+        var workflow = new Workflow("customer-support")
+            .addNode(new AIDecisionNode("classify", classificationAgent,
+                """
+                Classify this customer inquiry into one of these categories:
+                - technical_issue
+                - billing_question  
+                - general_inquiry
+                - complaint
+                
+                Also rate urgency from 1-5 (5 being most urgent).
+                Return JSON with: {"choice": "category", "confidence": 0.95, "reasoning": "explanation"}
+                """))
+            .addNode(new TechnicalSupportNode("tech_support"))
+            .addNode(new BillingSupportNode("billing_support"))  
+            .addNode(new GeneralSupportNode("general_support"))
+            .addNode(new EscalationNode("escalation"))
+            .setStartNodeId("classify");
+            
+        // Conditional routing based on AI classification
+        workflow.addEdge("classify", "tech_support", 
+            state -> "technical_issue".equals(state.get("ai_decision")))
+            
+        .addEdge("classify", "billing_support",
+            state -> "billing_question".equals(state.get("ai_decision")))
+            
+        .addEdge("classify", "general_support", 
+            state -> "general_inquiry".equals(state.get("ai_decision")))
+            
+        .addEdge("classify", "escalation",
+            state -> {
+                var confidence = (Double) state.get("ai_confidence");
+                var urgency = extractUrgencyFromReasoning((String) state.get("ai_reasoning"));
+                return confidence < 0.7 || urgency >= 4; // Low confidence or high urgency
+            });
+            
+        return workflow;
+    }
+    
+    private int extractUrgencyFromReasoning(String reasoning) {
+        // Extract urgency level from AI reasoning text
+        Pattern pattern = Pattern.compile("urgency.*(\\d)");
+        Matcher matcher = pattern.matcher(reasoning.toLowerCase());
+        return matcher.find() ? Integer.parseInt(matcher.group(1)) : 3;
+    }
+}
+
+// Usage with real-time monitoring
+var supportWorkflow = new CustomerSupportWorkflow().createWorkflow();
+
+// Add monitoring
+supportWorkflow.addObserver((eventType, data) -> {
+    if ("workflow-node-stop".equals(eventType)) {
+        var nodeData = (Map&lt;String, Object&gt;) data;
+        System.out.println("Completed node: " + nodeData.get("nodeId"));
+        
+        // Log AI decisions for analysis
+        if ("classify".equals(nodeData.get("nodeId"))) {
+            // Log classification results for model improvement
+            logClassificationResult(nodeData);
+        }
+    }
+}, "*");
+
+var initialState = new WorkflowState();
+initialState.put("customer_inquiry", "My billing seems wrong this month");
+initialState.put("customer_id", "CUST-12345");
+
+var result = supportWorkflow.run(initialState);</pre>
+            </div>
+            
+            <h3>🔄 Real-time Event Processing Pipeline</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>public class EventProcessingPipeline {
+    private final Agent processingAgent;
+    private final VectorStore eventStore;
+    private final BlockingQueue&lt;Event&gt; eventQueue = new LinkedBlockingQueue&lt;&gt;();
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private volatile boolean running = true;
+    
+    public EventProcessingPipeline() {
+        this.processingAgent = ConcreteAgent.make()
+            .withProvider(new AnthropicProvider("sk-ant-...", "claude-3-haiku-20240307"))
+            .withInstructions("""
+                You are an event analyzer. Process incoming events and extract:
+                1. Event type and severity
+                2. Key entities mentioned
+                3. Sentiment score (-1 to 1)
+                4. Recommended actions
+                Return structured JSON output.
+                """);
+                
+        this.eventStore = new ChromaVectorStore("http://localhost:8000", "events", 50);
+    }
+    
+    public void start() {
+        // Start processing threads
+        for (int i = 0; i < 4; i++) {
+            executor.submit(this::processEvents);
+        }
+        
+        // Start similarity monitoring thread
+        executor.submit(this::monitorSimilarEvents);
+    }
+    
+    public void submitEvent(Event event) {
+        eventQueue.offer(event);
+    }
+    
+    private void processEvents() {
+        while (running) {
+            try {
+                var event = eventQueue.take();
+                processEvent(event);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            } catch (Exception e) {
+                System.err.println("Error processing event: " + e.getMessage());
+            }
+        }
+    }
+    
+    private void processEvent(Event event) {
+        try {
+            // AI analysis
+            var analysis = processingAgent.structured(
+                new MessageRequest(new Message(MessageRole.USER, 
+                    "Analyze this event: " + event.description())),
+                EventAnalysis.class,
+                2
+            );
+            
+            // Create enriched document
+            var document = new Document(event.description());
+            document.addMetadata("event_id", event.id());
+            document.addMetadata("timestamp", event.timestamp().toString());
+            document.addMetadata("event_type", analysis.eventType());
+            document.addMetadata("severity", analysis.severity());
+            document.addMetadata("sentiment", analysis.sentiment());
+            document.addMetadata("entities", String.join(",", analysis.entities()));
+            
+            // Embed and store
+            var embeddingProvider = new OpenAIEmbeddingProvider("sk-...", "text-embedding-3-small");
+            var embeddedDoc = embeddingProvider.embedDocument(document);
+            eventStore.addDocument(embeddedDoc);
+            
+            // Take recommended actions
+            executeRecommendedActions(analysis.recommendedActions(), event);
+            
+        } catch (Exception e) {
+            System.err.println("Failed to process event " + event.id() + ": " + e.getMessage());
+        }
+    }
+    
+    private void monitorSimilarEvents() {
+        while (running) {
+            try {
+                Thread.sleep(30000); // Check every 30 seconds
+                
+                // Find event clusters
+                detectEventClusters();
+                
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            } catch (Exception e) {
+                System.err.println("Error in similarity monitoring: " + e.getMessage());
+            }
+        }
+    }
+    
+    private void detectEventClusters() {
+        // Implementation would query recent events and find clusters
+        // of similar events that might indicate patterns or issues
+        System.out.println("Checking for event clusters...");
+    }
+    
+    private void executeRecommendedActions(List&lt;String&gt; actions, Event event) {
+        actions.forEach(action -> {
+            switch (action.toLowerCase()) {
+                case "alert" -> sendAlert(event);
+                case "escalate" -> escalateEvent(event);
+                case "log" -> logEvent(event);
+                default -> System.out.println("Unknown action: " + action);
+            }
+        });
+    }
+    
+    private void sendAlert(Event event) {
+        System.out.println("🚨 ALERT: " + event.description());
+    }
+    
+    private void escalateEvent(Event event) {
+        System.out.println("📈 ESCALATING: " + event.id());
+    }
+    
+    private void logEvent(Event event) {
+        System.out.println("📝 LOGGED: " + event.description());
+    }
+    
+    public void stop() {
+        running = false;
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    public record Event(String id, String description, Instant timestamp, Map&lt;String, Object&gt; metadata) {}
+    
+    public record EventAnalysis(
+        String eventType,
+        int severity,
+        double sentiment,
+        List&lt;String&gt; entities,
+        List&lt;String&gt; recommendedActions
+    ) {}
+}
+
+// Usage
+var pipeline = new EventProcessingPipeline();
+pipeline.start();
+
+// Submit events
+pipeline.submitEvent(new EventProcessingPipeline.Event(
+    "EVT-001",
+    "User login failed multiple times from IP 192.168.1.100",
+    Instant.now(),
+    Map.of("ip", "192.168.1.100", "user", "john.doe")
+));
+
+pipeline.submitEvent(new EventProcessingPipeline.Event(
+    "EVT-002", 
+    "Payment processing error for order #12345",
+    Instant.now(),
+    Map.of("order_id", "12345", "amount", 99.99)
+));
+
+// Later, stop the pipeline
+Runtime.getRuntime().addShutdownHook(new Thread(pipeline::stop));</pre>
+            </div>
+            
+            <h3>🎛️ Configuration Management System</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>// Centralized configuration management
+public class FrameworkConfig {
+    private final Properties properties;
+    private final Map&lt;String, String&gt; envOverrides;
+    
+    public FrameworkConfig(String configFile) {
+        this.properties = new Properties();
+        this.envOverrides = System.getenv();
+        
+        try (var input = getClass().getClassLoader().getResourceAsStream(configFile)) {
+            if (input != null) {
+                properties.load(input);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load config: " + configFile, e);
+        }
+    }
+    
+    public String get(String key) {
+        // Environment variables take precedence
+        String envKey = key.toUpperCase().replace(".", "_");
+        return envOverrides.getOrDefault(envKey, properties.getProperty(key));
+    }
+    
+    public String get(String key, String defaultValue) {
+        String value = get(key);
+        return value != null ? value : defaultValue;
+    }
+    
+    public int getInt(String key, int defaultValue) {
+        String value = get(key);
+        return value != null ? Integer.parseInt(value) : defaultValue;
+    }
+    
+    public boolean getBoolean(String key, boolean defaultValue) {
+        String value = get(key);
+        return value != null ? Boolean.parseBoolean(value) : defaultValue;
+    }
+    
+    // Provider configurations
+    public ProviderConfig getProviderConfig(String providerName) {
+        return new ProviderConfig(
+            get(providerName + ".api.key"),
+            get(providerName + ".model"),
+            get(providerName + ".base.url"),
+            getInt(providerName + ".timeout.seconds", 30),
+            getInt(providerName + ".max.tokens", 4096)
+        );
+    }
+    
+    public record ProviderConfig(String apiKey, String model, String baseUrl, int timeoutSeconds, int maxTokens) {}
+}
+
+// Configuration-driven agent factory
+public class AgentFactory {
+    private final FrameworkConfig config;
+    
+    public AgentFactory(FrameworkConfig config) {
+        this.config = config;
+    }
+    
+    public Agent createAgent(String agentType) {
+        return switch (agentType.toLowerCase()) {
+            case "openai" -> createOpenAIAgent();
+            case "anthropic" -> createAnthropicAgent();
+            case "rag" -> createRAGAgent();
+            default -> throw new IllegalArgumentException("Unknown agent type: " + agentType);
+        };
+    }
+    
+    private Agent createOpenAIAgent() {
+        var providerConfig = config.getProviderConfig("openai");
+        var provider = new OpenAIProvider(providerConfig.apiKey(), providerConfig.model());
+        
+        return ConcreteAgent.make()
+            .withProvider(provider)
+            .withChatHistory(createChatHistory())
+            .withInstructions(config.get("agent.default.instructions", "You are a helpful assistant."));
+    }
+    
+    private Agent createAnthropicAgent() {
+        var providerConfig = config.getProviderConfig("anthropic");
+        var provider = new AnthropicProvider(providerConfig.apiKey(), providerConfig.model());
+        
+        return ConcreteAgent.make()
+            .withProvider(provider)
+            .withChatHistory(createChatHistory())
+            .withInstructions(config.get("agent.default.instructions", "You are a helpful assistant."));
+    }
+    
+    private RAG createRAGAgent() {
+        var embeddingProvider = createEmbeddingProvider();
+        var vectorStore = createVectorStore();
+        var aiProvider = createAIProvider();
+        
+        return new RAG(embeddingProvider, vectorStore)
+            .withProvider(aiProvider)
+            .withChatHistory(createChatHistory())
+            .setTopK(config.getInt("rag.top.k", 5))
+            .withInstructions(config.get("rag.instructions", "Answer based on the provided context."));
+    }
+    
+    private EmbeddingProvider createEmbeddingProvider() {
+        String provider = config.get("embedding.provider", "openai");
+        return switch (provider) {
+            case "openai" -> {
+                var cfg = config.getProviderConfig("openai");
+                yield new OpenAIEmbeddingProvider(cfg.apiKey(), "text-embedding-3-large");
+            }
+            case "ollama" -> new OllamaEmbeddingProvider(
+                config.get("ollama.base.url", "http://localhost:11434"),
+                config.get("ollama.embedding.model", "nomic-embed-text")
+            );
+            default -> throw new IllegalArgumentException("Unknown embedding provider: " + provider);
+        };
+    }
+    
+    private VectorStore createVectorStore() {
+        String storeType = config.get("vector.store.type", "memory");
+        return switch (storeType) {
+            case "chroma" -> new ChromaVectorStore(
+                config.get("chroma.url", "http://localhost:8000"),
+                config.get("chroma.collection", "documents"),
+                config.getInt("vector.store.default.k", 10)
+            );
+            case "elasticsearch" -> {
+                // Elasticsearch client would be configured here
+                throw new UnsupportedOperationException("Elasticsearch configuration not implemented");
+            }
+            case "memory" -> new MemoryVectorStore(config.getInt("vector.store.default.k", 10));
+            case "file" -> new FileVectorStore(
+                config.get("file.vector.store.directory", "/tmp"),
+                config.get("file.vector.store.filename", "vectors.jsonl"),
+                config.getInt("vector.store.default.k", 10)
+            );
+            default -> throw new IllegalArgumentException("Unknown vector store type: " + storeType);
+        };
+    }
+    
+    private AIProvider createAIProvider() {
+        String defaultProvider = config.get("agent.default.provider", "openai");
+        var providerConfig = config.getProviderConfig(defaultProvider);
+        
+        return switch (defaultProvider) {
+            case "openai" -> new OpenAIProvider(providerConfig.apiKey(), providerConfig.model());
+            case "anthropic" -> new AnthropicProvider(providerConfig.apiKey(), providerConfig.model());
+            case "gemini" -> new GeminiProvider(providerConfig.apiKey(), providerConfig.model());
+            default -> throw new IllegalArgumentException("Unknown AI provider: " + defaultProvider);
+        };
+    }
+    
+    private ChatHistory createChatHistory() {
+        String historyType = config.get("chat.history.type", "memory");
+        int contextWindow = config.getInt("chat.history.context.window", 50);
+        
+        return switch (historyType) {
+            case "memory" -> new InMemoryChatHistory(contextWindow);
+            case "file" -> new FileChatHistory(
+                contextWindow,
+                config.get("chat.history.directory", "/tmp"),
+                config.get("chat.history.filename", "chat.jsonl")
+            );
+            default -> throw new IllegalArgumentException("Unknown chat history type: " + historyType);
+        };
+    }
+}
+
+// Usage with configuration
+var config = new FrameworkConfig("application.properties");
+var agentFactory = new AgentFactory(config);
+
+// Create agents based on configuration
+var openaiAgent = agentFactory.createAgent("openai");
+var ragAgent = (RAG) agentFactory.createAgent("rag");</pre>
+            </div>
+            
+            <h3>🔄 Batch Processing System</h3>
+            
+            <div class="code-block" data-lang="java">
+<pre>// Batch processing for large document sets
+public class BatchDocumentProcessor {
+    private final RAG ragAgent;
+    private final ExecutorService executorService;
+    private final int batchSize;
+    private final Duration processingTimeout;
+    
+    public BatchDocumentProcessor(RAG ragAgent, int threadCount, int batchSize) {
+        this.ragAgent = ragAgent;
+        this.executorService = Executors.newFixedThreadPool(threadCount);
+        this.batchSize = batchSize;
+        this.processingTimeout = Duration.ofMinutes(30);
+    }
+    
+    public CompletableFuture&lt;BatchProcessingResult&gt; processDocumentsAsync(List&lt;Path&gt; documentPaths) {
+        return CompletableFuture.supplyAsync(() -> {
+            var startTime = Instant.now();
+            var processedCount = new AtomicInteger(0);
+            var errorCount = new AtomicInteger(0);
+            var errors = new ConcurrentLinkedQueue&lt;ProcessingError&gt;();
+            
+            // Split into batches
+            var batches = createBatches(documentPaths);
+            var futures = new ArrayList&lt;CompletableFuture&lt;Void&gt;&gt;();
+            
+            for (var batch : batches) {
+                var future = CompletableFuture.runAsync(() -> {
+                    processBatch(batch, processedCount, errorCount, errors);
+                }, executorService);
+                futures.add(future);
+            }
+            
+            // Wait for all batches to complete
+            try {
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .get(processingTimeout.toMinutes(), TimeUnit.MINUTES);
+            } catch (Exception e) {
+                errors.add(new ProcessingError("BATCH_TIMEOUT", "Processing timed out", e));
+            }
+            
+            var duration = Duration.between(startTime, Instant.now());
+            return new BatchProcessingResult(
+                processedCount.get(),
+                errorCount.get(),
+                new ArrayList&lt;&gt;(errors),
+                duration
+            );
+        });
+    }
+    
+    private List&lt;List&lt;Path&gt;&gt; createBatches(List&lt;Path&gt; paths) {
+        var batches = new ArrayList&lt;List&lt;Path&gt;&gt;();
+        for (int i = 0; i < paths.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, paths.size());
+            batches.add(paths.subList(i, end));
+        }
+        return batches;
+    }
+    
+    private void processBatch(List&lt;Path&gt; batch, AtomicInteger processedCount, 
+                             AtomicInteger errorCount, Queue&lt;ProcessingError&gt; errors) {
+        for (var path : batch) {
+            try {
+                processDocument(path);
+                processedCount.incrementAndGet();
+                
+                if (processedCount.get() % 100 == 0) {
+                    System.out.println("Processed " + processedCount.get() + " documents");
+                }
+            } catch (Exception e) {
+                errorCount.incrementAndGet();
+                errors.add(new ProcessingError(path.toString(), "Document processing failed", e));
+            }
+        }
+    }
+    
+    private void processDocument(Path documentPath) throws Exception {
+        var loader = new FileSystemDocumentLoader(documentPath)
+            .withTextSplitter(new DelimiterTextSplitter(1000, "\n\n", 100));
+            
+        var documents = loader.getDocuments();
+        
+        // Add to RAG system
+        ragAgent.addDocuments(documents);
+        
+        // Optional: Extract and store metadata
+        extractAndStoreMetadata(documentPath, documents);
+    }
+    
+    private void extractAndStoreMetadata(Path path, List&lt;Document&gt; documents) {
+        // Extract document-level metadata
+        try {
+            var metadata = Map.of(
+                "file_path", path.toString(),
+                "file_size", Files.size(path),
+                "last_modified", Files.getLastModifiedTime(path).toString(),
+                "chunk_count", documents.size(),
+                "processed_at", Instant.now().toString()
+            );
+            
+            // Store metadata (could be database, file, etc.)
+            storeDocumentMetadata(path.toString(), metadata);
+            
+        } catch (IOException e) {
+            System.err.println("Failed to extract metadata for " + path + ": " + e.getMessage());
+        }
+    }
+    
+    private void storeDocumentMetadata(String documentId, Map&lt;String, Object&gt; metadata) {
+        // Implementation would store in your chosen metadata store
+        System.out.println("Stored metadata for: " + documentId);
+    }
+    
+    public void shutdown() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+    
+    public record BatchProcessingResult(
+        int processedCount,
+        int errorCount,
+        List&lt;ProcessingError&gt; errors,
+        Duration processingTime
+    ) {}
+    
+    public record ProcessingError(String documentId, String message, Throwable cause) {}
+}
+
+// Usage
+var ragAgent = new RAG(embeddingProvider, vectorStore);
+var batchProcessor = new BatchDocumentProcessor(ragAgent, 4, 50);
+
+// Process large document set
+var documentPaths = Files.walk(Paths.get("/large-document-collection"))
+    .filter(Files::isRegularFile)
+    .collect(Collectors.toList());
+
+var resultFuture = batchProcessor.processDocumentsAsync(documentPaths);
+
+resultFuture.thenAccept(result -> {
+    System.out.println("Batch processing completed:");
+    System.out.println("- Processed: " + result.processedCount());
+    System.out.println("- Errors: " + result.errorCount());
+    System.out.println("- Duration: " + result.processingTime());
+    
+    if (!result.errors().isEmpty()) {
+        System.out.println("Errors:");
+        result.errors().forEach(error -> 
+            System.out.println("  " + error.documentId() + ": " + error.message()));
+    }
+});</pre>
+            </div>
+            
+            <div class="tip">
+                <strong>🎯 Production Best Practices:</strong>
+                <ul>
+                    <li><strong>Resource Management:</strong> Always use try-with-resources or proper cleanup patterns</li>
+                    <li><strong>Error Handling:</strong> Implement circuit breakers for external services and retry mechanisms</li>
+                    <li><strong>Monitoring:</strong> Use OpenTelemetry for comprehensive observability and metrics</li>
+                    <li><strong>Scaling:</strong> Consider async processing and connection pooling for high-volume scenarios</li>
+                    <li><strong>Testing:</strong> Mock providers and stores for reliable unit testing</li>
+                    <li><strong>Security:</strong> Store API keys securely, rotate regularly, and use environment variables</li>
+                    <li><strong>Performance:</strong> Monitor memory usage, implement caching, and optimize batch sizes</li>
+                    <li><strong>Configuration:</strong> Use centralized configuration management for different environments</li>
+                </ul>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Important Considerations:</strong>
+                <ul>
+                    <li><strong>Rate Limits:</strong> Most AI providers have rate limits - implement backoff strategies</li>
+                    <li><strong>Cost Management:</strong> Monitor token usage and implement cost controls</li>
+                    <li><strong>Data Privacy:</strong> Ensure sensitive data is handled according to compliance requirements</li>
+                    <li><strong>Model Versioning:</strong> Pin model versions in production to avoid unexpected changes</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="configuration-reference">
+            <h2>⚙️ Configuration Reference</h2>
+            
+            <h3>📋 Complete Configuration Example</h3>
+            
+            <div class="code-block" data-lang="properties">
+<pre># application.properties - Complete configuration example
+
+# Default Agent Settings
+agent.default.provider=openai
+agent.default.instructions=You are a helpful AI assistant.
+
+# Chat History Configuration
+chat.history.type=file
+chat.history.context.window=50
+chat.history.directory=/app/data/chat
+chat.history.filename=session.jsonl
+
+# OpenAI Provider Configuration
+openai.api.key=${OPENAI_API_KEY}
+openai.model=gpt-4
+openai.base.url=https://api.openai.com/v1
+openai.timeout.seconds=60
+openai.max.tokens=4096
+
+# Anthropic Provider Configuration
+anthropic.api.key=${ANTHROPIC_API_KEY}
+anthropic.model=claude-3-sonnet-20240229
+anthropic.base.url=https://api.anthropic.com
+anthropic.timeout.seconds=60
+anthropic.max.tokens=4096
+
+# Gemini Provider Configuration
+gemini.api.key=${GEMINI_API_KEY}
+gemini.model=gemini-pro
+gemini.base.url=https://generativelanguage.googleapis.com/v1beta
+
+# Ollama Provider Configuration
+ollama.base.url=http://localhost:11434
+ollama.model=llama2
+ollama.embedding.model=nomic-embed-text
+
+# RAG Configuration
+rag.instructions=Answer questions based on the provided context. Always cite your sources.
+rag.top.k=5
+
+# Embedding Provider Configuration
+embedding.provider=openai
+embedding.dimensions=1536
+
+# Vector Store Configuration
+vector.store.type=chroma
+vector.store.default.k=10
+
+# ChromaDB Configuration
+chroma.url=http://localhost:8000
+chroma.collection=documents
+
+# Elasticsearch Configuration
+elasticsearch.hosts=localhost:9200
+elasticsearch.index=documents
+
+# File Vector Store Configuration
+file.vector.store.directory=/app/data/vectors
+file.vector.store.filename=vectors.jsonl
+
+# Document Processing Configuration
+document.processing.chunk.size=1000
+document.processing.chunk.overlap=100
+document.processing.max.file.size.mb=100
+
+# Workflow Configuration
+workflow.max.execution.steps=1000
+workflow.persistence.type=file
+workflow.persistence.directory=/app/data/workflows
+
+# MCP Configuration
+mcp.server.command=npx
+mcp.server.args=@modelcontextprotocol/server-filesystem,/data
+mcp.server.timeout.seconds=30
+
+# Logging Configuration
+logging.level.com.skanga=INFO
+logging.level.com.skanga.core=DEBUG
+logging.file.path=/app/logs/application.log
+
+# Monitoring Configuration
+monitoring.enabled=true
+monitoring.opentelemetry.endpoint=http://localhost:4317
+monitoring.metrics.export.interval=30s
+
+# Performance Configuration
+http.client.connection.timeout.seconds=30
+http.client.read.timeout.seconds=60
+thread.pool.core.size=4
+thread.pool.max.size=16
+batch.processing.size=50</pre>
+            </div>
+            
+            <h3>🔧 Environment Variables</h3>
+            
+            <div class="code-block" data-lang="bash">
+<pre># Environment variable overrides (take precedence over properties)
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export GEMINI_API_KEY="..."
+
+# Database connections
+export CHROMA_URL="http://chroma-server:8000"
+export ELASTICSEARCH_HOSTS="es-cluster:9200"
+
+# Security
+export JWT_SECRET="your-jwt-secret"
+export ENCRYPTION_KEY="your-encryption-key"
+
+# Monitoring
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://jaeger:4317"
+export OTEL_SERVICE_NAME="mcp-framework"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=1.0.0"
+
+# Performance tuning
+export JVM_OPTS="-Xmx4g -Xms2g -XX:+UseG1GC"
+export THREAD_POOL_CORE_SIZE="8"
+export THREAD_POOL_MAX_SIZE="32"</pre>
+            </div>
+        </section>
+        
+        <section id="deployment">
+            <h2>🚀 Deployment Guide</h2>
+            
+            <h3>🐳 Docker Deployment</h3>
+            
+            <div class="code-block" data-lang="dockerfile">
+<pre># Dockerfile
+FROM eclipse-temurin:17-jre-alpine
+
+# Install dependencies
+RUN apk add --no-cache curl
+
+# Create app directory
+WORKDIR /app
+
+# Copy application
+COPY target/mcp-framework-*.jar app.jar
+COPY src/main/resources/application.properties application.properties
+
+# Create data directories
+RUN mkdir -p /app/data/chat /app/data/vectors /app/data/workflows /app/logs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Run application
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]</pre>
+            </div>
+            
+            <div class="code-block" data-lang="yaml">
+<pre># docker-compose.yml
+version: '3.8'
+
+services:
+  mcp-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CHROMA_URL=http://chroma:8000
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - chroma
+      - redis
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=chromadb.auth.token.TokenAuthCredentialsProvider
+      - CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER=X-Chroma-Token
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+volumes:
+  chroma_data:
+  redis_data:
+  es_data:</pre>
+            </div>
+            
+            <h3>☸️ Kubernetes Deployment</h3>
+            
+            <div class="code-block" data-lang="yaml">
+<pre># k8s-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-framework
+  labels:
+    app: mcp-framework
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mcp-framework
+  template:
+    metadata:
+      labels:
+        app: mcp-framework
+    spec:
+      containers:
+      - name: mcp-framework
+        image: your-registry/mcp-framework:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-api-keys
+              key: openai-key
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-api-keys
+              key: anthropic-key
+        - name: CHROMA_URL
+          value: "http://chroma-service:8000"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: mcp-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-framework-service
+spec:
+  selector:
+    app: mcp-framework
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-api-keys
+type: Opaque
+data:
+  openai-key: # base64 encoded API key
+  anthropic-key: # base64 encoded API key</pre>
+            </div>
+        </section>
+        
+        <footer>
+            <p>&copy; 2024 Java MCP Framework. Built with ❤️ for the AI community.</p>
+            <p>
+                <a href="https://github.com/your-org/java-mcp-framework" style="color: #3498db;">GitHub</a> |
+                <a href="https://docs.your-org.com/mcp" style="color: #3498db;">API Docs</a> |
+                <a href="https://community.your-org.com" style="color: #3498db;">Community</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

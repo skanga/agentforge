@@ -404,12 +404,13 @@ AIProvider provider = ProviderFactory.create(config);
 ### RAG Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Document Loader │───►│  Text Splitter  │───►│   Embeddings    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌───────────────────┐    ┌──────────────────┐
+│ Document Loader │───►│   Text Splitter   │───►│    Embeddings    │
+│ (pdf/txt/docx)  │    │ (delimiter based) │    │ (many providers) │
+└─────────────────┘    └───────────────────┘    └──────────────────┘
                                                         │
 ┌─────────────────┐    ┌──────────────────────┐         │
-│ Post Processors │◄───│ Vector Store         │◄────────┘
+│ Post Processors │◄───│     Vector Store     │◄────────┘
 | (refine/rerank) |    | (persist embeddings) |
 └─────────────────┘    └──────────────────────┘
          │                       │
@@ -491,25 +492,6 @@ public interface VectorStore {
     void addDocuments(List<Document> documents) throws VectorStoreException;
     List<Document> similaritySearch(List<Double> queryEmbedding, int k) throws VectorStoreException;
 }
-```
-
-### Exception Hierarchy
-
-```
-BaseAiException
-├── AgentException
-├── ProviderException
-├── ToolException
-│   ├── ToolCallableException
-│   └── MissingToolParameterException
-├── EmbeddingException
-├── VectorStoreException
-├── PostProcessorException
-├── ChatHistoryException
-├── WorkflowException
-│   ├── WorkflowInterrupt
-│   └── WorkflowExportException
-└── McpException
 ```
 
 ## 🔍 Monitoring & Observability
@@ -616,8 +598,8 @@ void testRAGEndToEnd() {
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/java-mcp-framework.git
-   cd java-mcp-framework
+   git clone https://github.com/skanga/agentforge
+   cd agentforge
    ```
 
 2. **Install dependencies**
@@ -654,7 +636,7 @@ void testRAGEndToEnd() {
 
 ### Reporting Issues
 
-Please use the [issue tracker](https://github.com/yourusername/java-mcp-framework/issues) to report bugs or request features. Include:
+Please use the [issue tracker](https://github.com/skanga/agentforge/issues) to report bugs or request features. Include:
 
 - Java version
 - Framework version
@@ -668,17 +650,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Model Context Protocol](https://modelcontextprotocol.io/) specification
-- [OpenAI](https://openai.com/) for API design inspiration
+- [OpenAI](https://openai.com/api) for their API and design inspiration
 - [LangChain](https://langchain.com/) for architectural patterns
+- [CrewAI](https://docs.crewai.com/) and [NeuronAI](https://docs.neuron-ai.dev/) for design inspiration & patterns
 - All contributors and the open-source community
 
 ## 📞 Support
 
 - **Documentation**: [https://docs.java-mcp-framework.com](https://docs.java-mcp-framework.com)
-- **Discord**: [Join our community](https://discord.gg/java-mcp-framework)
-- **Stack Overflow**: Tag questions with `java-mcp-framework`
-- **Email**: support@java-mcp-framework.com
+- **Issues**: Please use the Github [Issue Tracker](https://github.com/skanga/agentforge/issues) for all AgentForge questions
 
 ---
 
-**Made with ❤️ by the Java MCP Framework team**
+**Made with ❤️ in the San Francisco Bay Area**
