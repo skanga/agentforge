@@ -15,8 +15,8 @@ import java.util.Objects;
  *                  This list should not be null; it can be empty if no tools are called.
  */
 public record ToolCallMessage(
-    String id,
-    List<ToolCall> toolCalls
+    String id, // Assuming JSON 'id' maps to this
+    @com.fasterxml.jackson.annotation.JsonProperty("tool_calls") List<ToolCall> toolCalls
 ) {
     /**
      * Canonical constructor.

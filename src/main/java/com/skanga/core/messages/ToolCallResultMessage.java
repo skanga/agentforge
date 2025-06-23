@@ -20,9 +20,9 @@ import java.util.Objects;
  * @param content    The result of the tool execution, typically as a string (e.g., JSON string, raw text).
  */
 public record ToolCallResultMessage(
-    String toolCallId,
-    String role,
-    String name,
+    @com.fasterxml.jackson.annotation.JsonProperty("tool_call_id") String toolCallId,
+    String role, // Default serialization will be "role"
+    String name,   // Default serialization will be "name"
     String content
 ) {
     /**
