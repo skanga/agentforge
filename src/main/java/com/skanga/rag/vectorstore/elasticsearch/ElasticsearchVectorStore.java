@@ -80,10 +80,10 @@ public class ElasticsearchVectorStore implements VectorStore {
     private boolean mappingCheckedAndSet = false;
 
     // Standardized field names for Elasticsearch mapping
-    private static final String MAPPING_FIELD_EMBEDDING = "embedding";
-    private static final String MAPPING_FIELD_CONTENT = "content";
-    private static final String MAPPING_FIELD_SOURCE_TYPE = "sourceType";
-    private static final String MAPPING_FIELD_SOURCE_NAME = "sourceName";
+    public static final String MAPPING_FIELD_EMBEDDING = "embedding";
+    public static final String MAPPING_FIELD_CONTENT = "content";
+    public static final String MAPPING_FIELD_SOURCE_TYPE = "sourceType";
+    public static final String MAPPING_FIELD_SOURCE_NAME = "sourceName";
 
     /** Default value for K if constructor doesn't specify. */
     private static final int DEFAULT_K_ELASTIC = 5;

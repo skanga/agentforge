@@ -47,6 +47,7 @@ public class VoyageEmbeddingProvider extends AbstractEmbeddingProvider {
     private final String modelName; // e.g., "voyage-2", "voyage-code-2", "voyage-large-2"
     private final String baseUri;
     private final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
 
     /** Default Voyage AI API endpoint for embeddings. */
     public static final String DEFAULT_VOYAGE_API_BASE_URI = "https://api.voyageai.com/v1/embeddings";
@@ -59,14 +60,32 @@ public class VoyageEmbeddingProvider extends AbstractEmbeddingProvider {
      * @param apiKey    Your Voyage AI API key. Must not be null.
      * @param modelName The Voyage AI embedding model to use (e.g., "voyage-large-2"). Must not be null.
      */
-    public VoyageEmbeddingProvider(String apiKey, String modelName) {
+    /**
+     * Primary constructor for VoyageEmbeddingProvider.
+     * @param apiKey Your Voyage AI API key.
+     * @param modelName The Voyage AI embedding model to use.
+     * @param httpClient The HttpClient to use for requests.
+     */
+    public VoyageEmbeddingProvider(String apiKey, String modelName, HttpClient httpClient) {
         Objects.requireNonNull(apiKey, "Voyage AI API key cannot be null.");
         Objects.requireNonNull(modelName, "Voyage AI Model name cannot be null.");
+        Objects.requireNonNull(httpClient, "HttpClient cannot be null.");
 
         this.apiKey = apiKey;
         this.modelName = modelName;
         this.baseUri = DEFAULT_VOYAGE_API_BASE_URI;
         this.objectMapper = new ObjectMapper();
+        this.httpClient = httpClient;
+    }
+
+    /**
+     * Constructs a VoyageEmbeddingProvider using the default HttpClient.
+     *
+     * @param apiKey    Your Voyage AI API key. Must not be null.
+     * @param modelName The Voyage AI embedding model to use (e.g., "voyage-large-2"). Must not be null.
+     */
+    public VoyageEmbeddingProvider(String apiKey, String modelName) {
+        this(apiKey, modelName, HttpClientManager.getSharedClient());
     }
 
     /**
@@ -105,7 +124,7 @@ public class VoyageEmbeddingProvider extends AbstractEmbeddingProvider {
                 .build();
 
         try {
-            HttpResponse<String> httpResponse = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> httpResponse = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (httpResponse.statusCode() != 200) {
                 throw new EmbeddingException("Voyage AI API request for embedding failed",
@@ -125,18 +144,24 @@ public class VoyageEmbeddingProvider extends AbstractEmbeddingProvider {
 
             return embeddingResponse.data().get(0).embedding();
 
-        } catch (java.io.IOException e) {
+        } catch (java.io.IOException e) { // Includes JsonProcessingException
+            // This catch is for when statusCode WAS 200, but the body was unparseable.
             throw new EmbeddingException("Failed to deserialize Voyage AI embedding response from JSON: " + e.getMessage(), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new EmbeddingException("Voyage AI API call was interrupted: " + e.getMessage(), e);
         } catch (Exception e) {
+            if (e instanceof EmbeddingException) { // If it's already an EmbeddingException (e.g. from status code check)
+                throw (EmbeddingException) e;    // Re-throw it to preserve status code and original body.
+            }
+            // For other unexpected errors during the process
             throw new EmbeddingException("Error during Voyage AI API call for embedding: " + e.getMessage(), e);
         }
     }
 
     // Request DTO
-    private static record VoyageEmbeddingRequest(
+    // Making DTOs public static for testability and general good practice for DTOs if used externally.
+    public static record VoyageEmbeddingRequest(
             @JsonProperty("model") String model,
             @JsonProperty("input") String input,
             @JsonProperty("input_type") String inputType
@@ -147,20 +172,20 @@ public class VoyageEmbeddingProvider extends AbstractEmbeddingProvider {
     }
 
     // Response DTOs
-    private static record VoyageEmbeddingResponse(
+    public static record VoyageEmbeddingResponse(
             @JsonProperty("object") String object,
             @JsonProperty("data") List<VoyageEmbeddingData> data,
             @JsonProperty("model") String model,
             @JsonProperty("usage") VoyageUsage usage
     ) {}
 
-    private static record VoyageEmbeddingData(
+    public static record VoyageEmbeddingData(
             @JsonProperty("object") String object,
             @JsonProperty("embedding") List<Double> embedding,
             @JsonProperty("index") int index
     ) {}
 
-    private static record VoyageUsage(
+    public static record VoyageUsage(
             @JsonProperty("total_tokens") int totalTokens
     ) {}
 }

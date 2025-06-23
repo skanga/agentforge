@@ -124,6 +124,7 @@ public class PineconeVectorStore implements VectorStore {
     public PineconeVectorStore(String apiKey, String environment, String projectId, String indexName, String namespace, int defaultTopK) throws VectorStoreException {
         Objects.requireNonNull(apiKey, "Pinecone API key cannot be null.");
         Objects.requireNonNull(environment, "Pinecone environment cannot be null.");
+        Objects.requireNonNull(projectId, "Pinecone project ID cannot be null."); // Added null check
         Objects.requireNonNull(indexName, "Pinecone index name cannot be null.");
         // ProjectId might be implicitly handled by some client versions based on API key or environment.
 

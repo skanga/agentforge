@@ -335,13 +335,7 @@ public class Workflow implements ObservableAgentComponent {
         try {
             WorkflowState finalState = executeLoop(resumeNodeId, resumedState, initialResumedContext);
             // If executeLoop completes without further interruption, the workflow is done.
-            // Delete the persisted state as it's no longer needed.
-            try {
-                persistence.delete(this.workflowId);
-            } catch (WorkflowPersistenceException e) {
-                // Log warning but don't fail the overall successful resumption.
-                System.err.println("Warning: Workflow '" + this.workflowId + "' completed after resume, but failed to delete persisted interrupt state: " + e.getMessage());
-            }
+            // executeLoop() itself will delete the persisted state on successful non-interrupted completion.
             notifyObservers("workflow-resume-stop", Map.of("workflowId", workflowId, "status", "completed", "finalStateKeys", finalState.getAll().keySet().toString()));
             return finalState;
         } catch (WorkflowInterrupt e) {

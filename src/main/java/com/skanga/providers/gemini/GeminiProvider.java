@@ -44,10 +44,12 @@ public class GeminiProvider implements AIProvider {
     private final AtomicInteger streamCandidatesTokenCount = new AtomicInteger(0);
 
     private String systemInstructionText;
+    private HttpClient httpClient; // Added field
 
     public GeminiProvider(String apiKey, String modelName, Map<String, Object> parameters, String baseUri) {
         this.apiKey = Objects.requireNonNull(apiKey, "API key cannot be null");
         this.modelName = Objects.requireNonNull(modelName, "Model name cannot be null");
+        this.httpClient = HttpClientManager.getSharedClient(); // Default client
         this.baseUri = baseUri != null ? baseUri : DEFAULT_BASE_URI;
         this.parameters = parameters != null ? new HashMap<>(parameters) : new HashMap<>();
         this.messageMapper = new GeminiMessageMapper();
@@ -90,8 +92,21 @@ public class GeminiProvider implements AIProvider {
 
     @Override
     public AIProvider setHttpClient(Object client) {
-        // JDK HttpClient doesn't need external setting
+        if (client instanceof HttpClient) {
+            this.httpClient = (HttpClient) client;
+        } else if (client == null) {
+            this.httpClient = HttpClientManager.getSharedClient(); // Reset to default
+        } else {
+            throw new IllegalArgumentException("Client must be an instance of java.net.http.HttpClient");
+        }
         return this;
+    }
+
+    private HttpClient getClient() { // Renamed for clarity from previous provider
+        // Already initialized in constructor, or set by setHttpClient.
+        // If it could somehow be null later by other means, a default here would be needed.
+        // For now, assume it's always non-null after construction/setting.
+        return this.httpClient;
     }
 
     private List<Map<String, Object>> generateToolsPayload(List<com.skanga.tools.Tool> tools) {
@@ -185,7 +200,7 @@ public class GeminiProvider implements AIProvider {
                     .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                     .build();
 
-                HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200) {
                     throw new ProviderException("Gemini API request failed", response.statusCode(), response.body());
@@ -322,7 +337,7 @@ public class GeminiProvider implements AIProvider {
                 .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                 .build();
 
-            HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ProviderException("Gemini stream request failed", response.statusCode(), response.body());
@@ -448,7 +463,7 @@ public class GeminiProvider implements AIProvider {
                 .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                 .build();
 
-            HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ProviderException("Gemini structured output request failed", response.statusCode(), response.body());

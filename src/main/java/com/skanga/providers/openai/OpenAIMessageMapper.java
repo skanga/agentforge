@@ -25,9 +25,7 @@ public class OpenAIMessageMapper implements MessageMapper {
 
     @Override
     public List<Map<String, Object>> map(List<Message> messages) {
-        if (messages == null) {
-            return new ArrayList<>();
-        }
+        Objects.requireNonNull(messages, "Input message list cannot be null.");
         return messages.stream()
             .map(this::mapMessageToOpenAIFormat)
             .filter(Objects::nonNull) // Filter out any null messages (e.g., unsupported roles if not throwing)
@@ -78,18 +76,7 @@ public class OpenAIMessageMapper implements MessageMapper {
             }
 
             mappedMessage.put("tool_calls", toolCallsPayload);
-            // OpenAI Assistant messages with tool_calls can have null or empty string content.
-            // If there's also text content on our Message object, OpenAI API might not support it
-            // in the same message as tool_calls. For now, prioritize tool_calls.
-            // If original content was a string AND we also have attachments, it's more complex.
-            // The current Message has Object content, so it's one OR the other for primary content.
-            // If there was text and attachments, that's handled by multimodal content below.
-            // If content was ToolCallMessage, attachments are generally not expected by OpenAI.
-            if (content instanceof String && ((String) content).isEmpty()) {
-                 mappedMessage.put("content", null);              // Explicitly null if it was empty string with tool calls
-            } else if (!(content instanceof String)) {
-                 mappedMessage.put("content", null);              // Nullify content if it was ToolCallMessage object itself
-            }
+            mappedMessage.put("content", null); // OpenAI requires content to be null if tool_calls are present
         } else if (message.getRole() == MessageRole.TOOL) {       // This is a ToolCallResultMessage
             if (content instanceof ToolCallResultMessage) {
                 ToolCallResultMessage tcResult = (ToolCallResultMessage) content;
@@ -119,26 +106,45 @@ public class OpenAIMessageMapper implements MessageMapper {
         } else if (attachments != null && !attachments.isEmpty() && openAIRole.equals("user")) {
             // Multimodal content (text + images) - typically for "user" role
             List<Map<String, Object>> contentParts = new ArrayList<>();
-            // Add text part if main content is string and non-empty
-            if (content instanceof String && !((String) content).isEmpty()) {
-                Map<String, Object> textPart = new HashMap<>();
-                textPart.put("type", "text");
-                textPart.put("text", (String) content);
-                contentParts.add(textPart);
-            }
+
+            // Always add a text part for user messages with attachments.
+            // If original content is not String or is null, use empty string for the text part.
+            Map<String, Object> textPart = new HashMap<>();
+            textPart.put("type", "text");
+            textPart.put("text", (content instanceof String) ? (String) content : "");
+            contentParts.add(textPart);
 
             for (Attachment attachment : attachments) {
                 if (attachment.getType() == com.skanga.chat.enums.AttachmentType.IMAGE) {
                     contentParts.add(mapAttachmentToOpenAIFormat(attachment));
                 } else {
                     // OpenAI currently only supports image attachments for multimodal messages.
-                    // Other document types might be ignored or cause errors.
-                    System.err.println("Warning: OpenAI mapping non-image attachment type " + attachment.getType() + " as text link in user message, or ignoring.");
-                    // Optionally, could add a text part with a link or reference to the document.
-                    // contentParts.add(Map.of("type", "text", "text", "Attached document: " + attachment.getSourceName()));
+                    // Other document types are ignored in terms of adding new content parts.
+                    System.err.println("Warning: OpenAI mapping ignores non-image attachment type " + attachment.getType() + " for user message with images.");
                 }
             }
-            mappedMessage.put("content", contentParts);
+            // If only the initial text part was added (e.g. no image attachments processed, or original content was complex)
+            // and that text part is empty, and there were no images, this might not be what OpenAI expects.
+            // However, if there IS an image, contentParts will have >1 element.
+            // If contentParts only has one (the text part), and it was derived from a non-String or null original content,
+            // it means there were no image attachments. In this case, we should not send a list.
+            if (contentParts.size() == 1 && contentParts.get(0).get("type").equals("text") && !(content instanceof String)) {
+                 // This case means original content was not string, and no image attachments were added.
+                 // Revert to simple string content if possible, or null/empty based on original.
+                 if (content == null) mappedMessage.put("content", null);
+                 else mappedMessage.put("content", content.toString()); // Or try to serialize as JSON string
+            } else if (contentParts.stream().anyMatch(p -> "image_url".equals(p.get("type")))) {
+                 // If there's at least one image, use the contentParts list.
+                mappedMessage.put("content", contentParts);
+            } else if (content instanceof String) { // Only text, no images added
+                mappedMessage.put("content", (String) content);
+            }
+            // If contentParts only has text part (from original string content) and no images were added,
+            // it should simplify back to plain string content.
+            else if (contentParts.size() == 1 && contentParts.get(0).get("type").equals("text")) {
+                 mappedMessage.put("content", contentParts.get(0).get("text"));
+            }
+
 
         } else if (content instanceof String) {
             // Simple text content
@@ -178,7 +184,11 @@ public class OpenAIMessageMapper implements MessageMapper {
                 System.err.println("Warning: DEVELOPER role mapped to 'user' for OpenAI");
                 yield "user";
             }
-            default -> throw new ProviderException("Unsupported message role for OpenAI: " + role);
+            // Any other role not explicitly handled above will be filtered out by returning null.
+            default -> {
+                System.err.println("Warning: Unsupported message role for OpenAI: " + role + ". Message will be skipped.");
+                yield null;
+            }
         };
     }
 

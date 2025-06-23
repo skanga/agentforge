@@ -97,8 +97,8 @@ class MermaidExporterTests {
         String mermaid = exporterTd.export(workflow);
 
         // Sanitized ID: Node_With_Spaces__Chars
-        // Label: TestNode::Node With Spaces & Chars! (with " escaped)
-        assertTrue(mermaid.contains("    Node_With_Spaces__Chars[\"TestNode::Node With Spaces #quot; Chars!\"];\n"));
+        // Label: TestNode::Node With Spaces & Chars! (escapeMermaidLabelCharacters only handles \\ and \")
+        assertTrue(mermaid.contains("    Node_With_Spaces__Chars[\"TestNode::Node With Spaces & Chars!\"];\n"));
     }
 
     @Test

@@ -86,7 +86,7 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
 
     @Override
     public Agent withProvider(AIProvider provider) {
-        this.provider = provider;
+        this.provider = Objects.requireNonNull(provider, "AIProvider cannot be null for BaseAgent.withProvider");
         return this;
     }
 
@@ -306,19 +306,16 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
             return response;
         } catch (java.util.concurrent.CompletionException e) {
             long durationMs = System.currentTimeMillis() - startTime;
-            Throwable cause = e.getCause();
+            Throwable cause = e.getCause(); // First and only declaration of 'cause' in this block
             notifyObservers("error", new com.skanga.observability.events.AgentError(cause, true, "chat() failed"));
             notifyObservers("chat-stop", new com.skanga.observability.events.ChatStop(request, null, durationMs));
 
-            // Unwrap and rethrow appropriate exception
             if (cause instanceof AgentException) {
                 throw (AgentException) cause;
-            } else if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            } else {
+            } else { // Includes ProviderException (which is RuntimeException) and other Throwables
                 throw new AgentException("Error in chat: " + cause.getMessage(), cause);
             }
-        } catch (Exception e) {
+        } catch (Exception e) { // Catch other exceptions from chatAsync setup or non-CompletionExceptions
             long durationMs = System.currentTimeMillis() - startTime;
             notifyObservers("error", new com.skanga.observability.events.AgentError(e, true, "chat() failed"));
             notifyObservers("chat-stop", new com.skanga.observability.events.ChatStop(request, null, durationMs));
@@ -326,17 +323,21 @@ public abstract class BaseAgent implements Agent, AutoCloseable {
         }
     }
 
+    // private Throwable unwrapCompletionCause(Throwable t) { // Reverted this helper, unwrapException is used in chatAsync
+    //     if (t instanceof java.util.concurrent.CompletionException && t.getCause() != null) {
+    //         return t.getCause();
+    //     }
+    //     return t;
+    // }
+
+
     @Override
     public CompletableFuture<Message> chatAsync(MessageRequest request) {
         // Event data preparation
         Map<String, Object> agentContext = Map.of("agent_class", this.getClass().getSimpleName(), "provider", provider != null ? provider.getClass().getSimpleName() : "null");
-        // Notifying chat-start here if not done by the public `chat()` method already.
-        // However, typically `chat()` is the public entry point that should trigger `chat-start`.
-        // If `chatAsync` is also public and can be called directly, it might also need to notify.
-        // For now, assuming `chat()` handles the outer "chat-start" and "chat-stop".
 
         try {
-            // 1. Fill chat history (from request, if not already there or if it's a new turn)
+            // 1. Fill chat history
             // This step was implicit in PHP's $this->chatHistory->addMessages($request->messages)
             // In Java, BaseAgent.fillChatHistory needs to be called.
             fillChatHistory(request);

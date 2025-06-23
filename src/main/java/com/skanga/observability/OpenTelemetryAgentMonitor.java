@@ -63,11 +63,11 @@ public class OpenTelemetryAgentMonitor implements AgentObserver {
 
     // Stores top-level spans for an entire agent flow (e.g., one `chat()` call).
     // Key: A flow correlation ID (e.g., derived from initial request).
-    private final Map<String, Span> activeFlowSpans = new ConcurrentHashMap<>();
+    /* private */ final Map<String, Span> activeFlowSpans = new ConcurrentHashMap<>(); // Made package-private for test setup
 
     // Stores active sub-spans for operations within a flow (e.g., a specific inference call or tool call).
     // Key: A more specific ID (e.g., flowId + "_inference", or "tool_" + toolCallId).
-    private final Map<String, Span> activeSubSpans = new ConcurrentHashMap<>();
+    /* private */ final Map<String, Span> activeSubSpans = new ConcurrentHashMap<>(); // Made package-private for test setup
 
     /** Max length for attribute values to prevent overly large telemetry data. */
     private static final int MAX_ATTRIBUTE_LENGTH = 2048;
@@ -89,6 +89,10 @@ public class OpenTelemetryAgentMonitor implements AgentObserver {
 
     @Override
     public void update(String eventType, Object eventData) {
+        if (eventType == null) {
+            System.err.println("OpenTelemetryAgentMonitor received a null eventType. Ignoring event.");
+            return;
+        }
         try {
             // Attempt to get a correlation ID for the current flow.
             // This is a simplified approach. Robust correlation might require explicit IDs passed in events.

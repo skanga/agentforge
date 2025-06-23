@@ -53,38 +53,47 @@ public class OpenAIProvider implements AIProvider {
     private final List<Object> tools = new ArrayList<>();
     private final OpenAIMessageMapper messageMapper;
     private static final ObjectMapper jsonObjectMapper = ProviderUtils.getObjectMapper();
+    private final HttpClient httpClient;
 
     private String systemPrompt;
 
     /**
-     * Constructs an OpenAIProvider with a custom base URI.
+     * Primary constructor for OpenAIProvider.
      *
      * @param apiKey     Your OpenAI API key.
      * @param model      The OpenAI model name to use (e.g., "gpt-3.5-turbo", "gpt-4").
      * @param parameters Default parameters for API requests (e.g., temperature, max_tokens).
      * @param baseUri    The base URI for the OpenAI API. Allows overriding for proxies or different environments.
+     * @param httpClient The HttpClient to use for requests.
      */
-    public OpenAIProvider(String apiKey, String model, Map<String, Object> parameters, String baseUri) {
+    public OpenAIProvider(String apiKey, String model, Map<String, Object> parameters, String baseUri, HttpClient httpClient) {
         this.apiKey = Objects.requireNonNull(apiKey, "OpenAI API key cannot be null");
         this.model = Objects.requireNonNull(model, "OpenAI model name cannot be null");
         this.parameters = parameters != null ? new HashMap<>(parameters) : new HashMap<>();
         this.messageMapper = new OpenAIMessageMapper();
         this.baseUri = Objects.requireNonNull(baseUri, "Base URI cannot be null");
+        this.httpClient = Objects.requireNonNull(httpClient, "HttpClient cannot be null.");
     }
 
     /**
-     * Constructs an OpenAIProvider with the default OpenAI API base URI.
-     *
-     * @param apiKey     Your OpenAI API key.
-     * @param model      The OpenAI model name to use.
-     * @param parameters Default parameters for API requests.
+     * Constructs an OpenAIProvider with a custom base URI, using the default shared HttpClient.
      */
-    public OpenAIProvider(String apiKey, String model, Map<String, Object> parameters) {
-        this(apiKey, model, parameters, DEFAULT_BASE_URI);
+    public OpenAIProvider(String apiKey, String model, Map<String, Object> parameters, String baseUri) {
+        this(apiKey, model, parameters, baseUri, HttpClientManager.getSharedClient());
     }
 
+    /**
+     * Constructs an OpenAIProvider with the default OpenAI API base URI and default shared HttpClient.
+     */
+    public OpenAIProvider(String apiKey, String model, Map<String, Object> parameters) {
+        this(apiKey, model, parameters, DEFAULT_BASE_URI, HttpClientManager.getSharedClient());
+    }
+
+    /**
+     * Constructs an OpenAIProvider with a specific model and custom base URI, null parameters, and default shared HttpClient.
+     */
     public OpenAIProvider(String apiKey, String model, String baseUri) {
-        this(apiKey, model, null, baseUri);
+        this(apiKey, model, null, baseUri, HttpClientManager.getSharedClient());
     }
 
     @Override
@@ -109,7 +118,12 @@ public class OpenAIProvider implements AIProvider {
 
     @Override
     public AIProvider setHttpClient(Object client) {
-        // JDK HttpClient doesn't need external setting
+        // Constructor injection is preferred. This method is largely a no-op
+        // as the internal httpClient is final.
+        if (client instanceof HttpClient) {
+            // To make this effective, httpClient field would need to be non-final.
+             System.err.println("OpenAIProvider: HttpClient should be set via constructor for testability. Set via setHttpClient is currently ignored if already set.");
+        }
         return this;
     }
 
@@ -178,7 +192,7 @@ public class OpenAIProvider implements AIProvider {
                     .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                     .build();
 
-                HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200) {
                     throw new ProviderException("OpenAI API request failed", response.statusCode(), response.body());
@@ -229,6 +243,9 @@ public class OpenAIProvider implements AIProvider {
                 return resultMessage;
 
             } catch (Exception e) {
+                if (e instanceof ProviderException) {
+                    throw (ProviderException) e;
+                }
                 throw new ProviderException("Error during OpenAI API call: " + e.getMessage(), e);
             }
         });
@@ -384,7 +401,7 @@ public class OpenAIProvider implements AIProvider {
                 .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                 .build();
 
-            HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ProviderException("OpenAI structured request failed", response.statusCode(), response.body());

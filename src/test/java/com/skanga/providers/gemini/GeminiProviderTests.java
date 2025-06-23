@@ -22,6 +22,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException; // Added import
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -144,8 +145,9 @@ class GeminiProviderTests {
         CompletableFuture<Message> future = provider.chatAsync(messages, null, Collections.emptyList());
 
         // Assert
-        ProviderException exception = assertThrows(ProviderException.class, () -> future.get());
-        assertThat(exception.getMessage()).contains("prompt was blocked");
+        ExecutionException executionException = assertThrows(ExecutionException.class, future::get);
+        assertThat(executionException.getCause()).isInstanceOf(ProviderException.class);
+        assertThat(executionException.getCause().getMessage()).contains("prompt was blocked");
     }
 
     @Test
@@ -167,8 +169,9 @@ class GeminiProviderTests {
         CompletableFuture<Message> future = provider.chatAsync(messages, null, Collections.emptyList());
 
         // Assert
-        ProviderException exception = assertThrows(ProviderException.class, () -> future.get());
-        assertThat(exception.getMessage()).contains("finished due to: MAX_TOKENS");
+        ExecutionException executionException = assertThrows(ExecutionException.class, future::get);
+        assertThat(executionException.getCause()).isInstanceOf(ProviderException.class);
+        assertThat(executionException.getCause().getMessage()).contains("finished due to: MAX_TOKENS");
     }
 
     @Test
@@ -308,9 +311,9 @@ class GeminiProviderTests {
     }
 
     private GenerateContentResponse createMockGeminiResponseWithFinishReason(String finishReason) {
-        GeminiPart textPart = new GeminiPart("Incomplete response");
-        GeminiContent content = new GeminiContent("model", Arrays.asList(textPart));
-        GeminiCandidate candidate = new GeminiCandidate(content, finishReason, 0, null, null);
+        // Ensure content or parts are null/empty to trigger the finishReason check in the provider
+        GeminiContent contentWithNoParts = new GeminiContent("model", Collections.emptyList());
+        GeminiCandidate candidate = new GeminiCandidate(contentWithNoParts, finishReason, 0, null, null);
 
         return new GenerateContentResponse(
                 Arrays.asList(candidate), null, new GeminiUsageMetadata(10, 15, 25)

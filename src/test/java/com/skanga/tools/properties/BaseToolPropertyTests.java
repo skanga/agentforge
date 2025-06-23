@@ -88,12 +88,11 @@ class BaseToolPropertyTests {
 
     @Test
     void getJsonSchema_emptyDescription_descriptionNotIncluded() {
-        // Based on current BaseToolProperty, empty string description IS included.
-        // This can be debated if it should be omitted. For now, testing current behavior.
+        // The code correctly omits description if it's null or empty.
+        // The test should assert this behavior.
         ConcreteToolProperty prop = new ConcreteToolProperty("value", PropertyType.NUMBER, "", false);
         Map<String, Object> schema = prop.getJsonSchema();
-        assertTrue(schema.containsKey("description"));
-        assertEquals("", schema.get("description"));
+        assertFalse(schema.containsKey("description"), "Description key should not be included if the description string is empty.");
     }
 
 

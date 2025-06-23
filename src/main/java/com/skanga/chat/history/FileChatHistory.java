@@ -67,8 +67,8 @@ public class FileChatHistory extends AbstractChatHistory {
         this.filePath = Paths.get(directoryPath, effectiveFileName);
 
         this.objectMapper = new ObjectMapper();
-        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // For human-readable JSON in file
-        // Disable FAIL_ON_EMPTY_BEANS for cases where an empty object might be serialized (e.g. empty metadata)
+        // DO NOT use INDENT_OUTPUT for JSONL (one JSON object per line)
+        // this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
         init();
@@ -89,7 +89,8 @@ public class FileChatHistory extends AbstractChatHistory {
         this.filePath = Paths.get(directoryPath, fullFileName);
 
         this.objectMapper = new ObjectMapper();
-        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        // DO NOT use INDENT_OUTPUT for JSONL (one JSON object per line)
+        // this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         this.objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         init();
     }

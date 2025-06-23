@@ -7,6 +7,7 @@ import com.skanga.observability.events.ChatStart; // Example event
 import com.skanga.core.messages.MessageRequest; // For ChatStart
 import com.skanga.chat.messages.Message; // For ChatStart
 import com.skanga.chat.enums.MessageRole; // For ChatStart
+import com.fasterxml.jackson.core.type.TypeReference; // Added import
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat; // Added for AssertJ
 
 @ExtendWith(MockitoExtension.class) // Integrates Mockito with JUnit 5
 class LoggingObserverTests {
@@ -35,9 +37,10 @@ class LoggingObserverTests {
         // Pass the mock logger to the observer
         loggingObserver = new LoggingObserver(mockLogger);
         // Ensure specific log levels are enabled on the mock so verify() works
-        when(mockLogger.isInfoEnabled()).thenReturn(true);
-        when(mockLogger.isWarnEnabled()).thenReturn(true);
-        when(mockLogger.isErrorEnabled()).thenReturn(true);
+        // Make stubs lenient as not all tests use all log levels.
+        lenient().when(mockLogger.isInfoEnabled()).thenReturn(true);
+        lenient().when(mockLogger.isWarnEnabled()).thenReturn(true);
+        lenient().when(mockLogger.isErrorEnabled()).thenReturn(true);
     }
 
     @Test
@@ -67,11 +70,15 @@ class LoggingObserverTests {
 
         ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockLogger).info(eq("AGENT EVENT: Type=[{}], Data: {}"), eq(eventType), messageCaptor.capture());
-        // Due to pretty printing, exact string match might be tricky with spacing/newlines.
-        // A more robust check would be to parse the JSON back or compare key fields.
-        // For now, simple contains check.
-        assertTrue(messageCaptor.getValue().contains("\"request\""));
-        assertTrue(messageCaptor.getValue().contains("\"agent\":\"TestAgent\""));
+
+        // Parse the captured JSON string to verify its content more robustly
+        String loggedJson = messageCaptor.getValue();
+        // Reverting to string contains due to stubborn compile error with readValue/TypeReference
+        assertThat(loggedJson).contains("\"request\"");
+        // Example of a more specific string check that might be brittle with pretty printing:
+        // assertThat(loggedJson).containsPattern("\"agent\"\\s*:\\s*\"TestAgent\"");
+        assertThat(loggedJson).contains("\"agent\" : \"TestAgent\""); // Assuming consistent pretty print spacing
+
     }
 
     @Test
@@ -79,7 +86,6 @@ class LoggingObserverTests {
         String eventType = "error"; // As used in BaseAgent
         RuntimeException cause = new RuntimeException("Critical failure");
         AgentError eventData = new AgentError(cause, true, "Something broke badly");
-        String expectedJson = realObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(eventData);
 
         loggingObserver.update(eventType, eventData);
 
@@ -88,13 +94,15 @@ class LoggingObserverTests {
         ArgumentCaptor<String> jsonDataCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
 
-
         verify(mockLogger).error(messageFormatCaptor.capture(), eventTypeCaptor.capture(), jsonDataCaptor.capture(), throwableCaptor.capture());
 
         assertEquals("CRITICAL AGENT EVENT: Type=[{}], Data: {}", messageFormatCaptor.getValue());
         assertEquals(eventType, eventTypeCaptor.getValue());
-        assertTrue(jsonDataCaptor.getValue().contains("\"critical\":true"));
-        assertTrue(jsonDataCaptor.getValue().contains("\"message\":\"Something broke badly\""));
+
+        String loggedJson = jsonDataCaptor.getValue();
+        assertThat(loggedJson).contains("\"critical\" : true"); // Check for key-value pair, mindful of spacing
+        assertThat(loggedJson).contains("\"message\" : \"Something broke badly\"");
+
         assertSame(cause, throwableCaptor.getValue());
     }
 
@@ -103,7 +111,6 @@ class LoggingObserverTests {
         String eventType = "error";
         RuntimeException cause = new RuntimeException("Minor issue");
         AgentError eventData = new AgentError(cause, false, "A recoverable problem");
-        String expectedJson = realObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(eventData);
 
         loggingObserver.update(eventType, eventData);
 
@@ -116,7 +123,11 @@ class LoggingObserverTests {
 
         assertEquals("AGENT EVENT: Type=[{}], Data: {}", messageFormatCaptor.getValue());
         assertEquals(eventType, eventTypeCaptor.getValue());
-        assertTrue(jsonDataCaptor.getValue().contains("\"critical\":false"));
+
+        String loggedJson = jsonDataCaptor.getValue();
+        assertThat(loggedJson).contains("\"critical\" : false");
+        assertThat(loggedJson).contains("\"message\" : \"A recoverable problem\"");
+
         assertSame(cause, throwableCaptor.getValue());
     }
 
@@ -166,26 +177,25 @@ class LoggingObserverTests {
         // This test will just check the toString fallback path if writeValueAsString failed.
 
         // To directly test the fallback path, we'd need to ensure writeValueAsString throws.
-        // This is hard without injecting a mock ObjectMapper.
-        // The current serializeEventData will use eventData.toString() if object mapper fails.
-        // Let's assume a specific type of object that might be tricky for a default ObjectMapper
-        // if it's not configured for it (though basic Objects usually just become {}).
+        // This is hard without injecting a mock ObjectMapper into LoggingObserver.
+        // The current LoggingObserver.serializeEventData will use eventData.toString() as part of its
+        // fallback message if its internal ObjectMapper fails.
 
-        // A more direct test of the fallback string:
-        ObjectMapper failingMapper = mock(ObjectMapper.class);
-        when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("Test Serialization Fail"){});
-        // If we could inject failingMapper into loggingObserver, this would test the catch block.
-        // Since we can't directly, this test is more conceptual for that path.
-        // The current implementation of serializeEventData will catch and format a message.
+        // The current test setup with 'unserializableData = new Object() { ... }' and
+        // the LoggingObserver's ObjectMapper having FAIL_ON_EMPTY_BEANS disabled,
+        // will result in "{}" being logged, not an actual serialization error.
+        // So, we are testing the successful serialization of such an object.
 
-        // Test with a common object, assuming default mapper.
         loggingObserver.update(eventType, unserializableData);
         ArgumentCaptor<String> dataCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockLogger).info(eq("AGENT EVENT: Type=[{}], Data: {}"), eq(eventType), dataCaptor.capture());
-        // Expect it to be a JSON object by default if no error, or the toString if error was forced.
-        // With default ObjectMapper and simple new Object(), it will be "{}".
-         assertTrue(dataCaptor.getValue().equals("{}") || dataCaptor.getValue().contains("UnserializableObjectToString"));
 
+        // With FAIL_ON_EMPTY_BEANS disabled, and INDENT_OUTPUT enabled in the logger's ObjectMapper,
+        // an empty object might be serialized as "{ }" or "{\n}".
+        // Parse it and check if it's an empty JSON object node.
+        String capturedJson = dataCaptor.getValue();
+        com.fasterxml.jackson.databind.JsonNode node = realObjectMapper.readTree(capturedJson);
+        assertTrue(node.isObject() && node.isEmpty(), "Logged JSON should represent an empty object, actual: " + capturedJson);
     }
 
     @Test

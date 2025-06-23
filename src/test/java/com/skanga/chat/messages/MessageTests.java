@@ -138,8 +138,8 @@ class MessageTests {
         assertTrue(json.contains("\"role\":\"USER\""));
         assertTrue(json.contains("\"content\":\"Hello\""));
         assertFalse(json.contains("\"usage\"")); // Null fields are not included by default
-        assertFalse(json.contains("\"attachments\"")); // Empty lists might not be included if NON_EMPTY
-                                                       // but current default is NON_NULL, so empty lists ARE included.
+        // Removed: assertFalse(json.contains("\"attachments\""));
+        // Based on NON_NULL, empty attachments list should be serialized as "attachments":[]
         assertTrue(json.contains("\"attachments\":[]"));
         assertTrue(json.contains("\"meta\":{}"));
     }
@@ -152,11 +152,12 @@ class MessageTests {
         message.addMetadata("source", "model_v2");
 
         String json = objectMapper.writeValueAsString(message);
+        // System.out.println("Serialized JSON for jsonSerialization_withAllFields_serializesCorrectly: " + json); // Debug line removed
 
         assertTrue(json.contains("\"role\":\"ASSISTANT\""));
         assertTrue(json.contains("\"content\":\"Response details\""));
         assertTrue(json.contains("\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":20,\"total_tokens\":30}"));
-        assertTrue(json.contains("\"attachments\":[{\"type\":\"IMAGE\",\"content\":\"base64data\",\"contentType\":\"BASE64\",\"mediaType\":\"image/png\"}]"));
+        assertTrue(json.contains("\"attachments\":[{\"content\":\"base64data\",\"contentType\":\"BASE64\",\"mediaType\":\"image/png\",\"type\":\"IMAGE\"}]")); // Adjusted field order
         assertTrue(json.contains("\"meta\":{\"source\":\"model_v2\"}"));
     }
 

@@ -36,6 +36,7 @@ public class OllamaEmbeddingProvider extends AbstractEmbeddingProvider {
     private final String modelName;
     private final ObjectMapper objectMapper;
     private final Map<String, Object> options; // Optional parameters for Ollama embeddings request
+    private final HttpClient httpClient;
 
     /** Default Ollama API endpoint for embeddings relative to base URL. */
     public static final String DEFAULT_OLLAMA_EMBEDDINGS_API_PATH = "/api/embeddings";
@@ -47,9 +48,10 @@ public class OllamaEmbeddingProvider extends AbstractEmbeddingProvider {
      * @param modelName  The name of the embedding model hosted by Ollama. Must not be null.
      * @param options    Optional map of parameters to pass to the Ollama API (e.g., "num_ctx", "temperature"). Can be null.
      */
-    public OllamaEmbeddingProvider(String baseUrl, String modelName, Map<String, Object> options) {
+    public OllamaEmbeddingProvider(String baseUrl, String modelName, Map<String, Object> options, HttpClient httpClient) {
         Objects.requireNonNull(baseUrl, "Ollama base URL cannot be null.");
         Objects.requireNonNull(modelName, "Ollama model name cannot be null.");
+        Objects.requireNonNull(httpClient, "HttpClient cannot be null.");
 
         // Normalize baseUrl to ensure it doesn't end with common API paths
         String normalizedBaseUrl = baseUrl;
@@ -62,18 +64,25 @@ public class OllamaEmbeddingProvider extends AbstractEmbeddingProvider {
         this.baseUrl = normalizedBaseUrl;
         this.modelName = modelName;
         this.options = (options == null) ? Collections.emptyMap() : new HashMap<>(options);
-
+        this.httpClient = httpClient;
         this.objectMapper = new ObjectMapper();
     }
+     /**
+     * Constructs an OllamaEmbeddingProvider with specified options, using the default HttpClient.
+     */
+    public OllamaEmbeddingProvider(String baseUrl, String modelName, Map<String, Object> options) {
+        this(baseUrl, modelName, options, HttpClientManager.getSharedClient());
+    }
+
 
     /**
-     * Constructs an OllamaEmbeddingProvider without additional model options.
+     * Constructs an OllamaEmbeddingProvider without additional model options, using the default HttpClient.
      *
      * @param baseUrl   The base URL of the Ollama server.
      * @param modelName The name of the embedding model.
      */
     public OllamaEmbeddingProvider(String baseUrl, String modelName) {
-        this(baseUrl, modelName, null);
+        this(baseUrl, modelName, null, HttpClientManager.getSharedClient());
     }
 
     /**
@@ -107,7 +116,7 @@ public class OllamaEmbeddingProvider extends AbstractEmbeddingProvider {
                 .build();
 
         try {
-            HttpResponse<String> httpResponse = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> httpResponse = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = httpResponse.body();
 
             if (httpResponse.statusCode() != 200) {

@@ -78,9 +78,12 @@ class PdfTextFileReaderTests {
             reader.getText(notAPdf, Collections.emptyMap());
         });
         assertTrue(ex instanceof IOException || ex instanceof DocumentLoaderException, "Exception should be IOException or DocumentLoaderException");
-        if(ex.getMessage() != null) { // Message could be null for some IOExceptions
-             assertTrue(ex.getMessage().contains("Error parsing PDF") || ex.getMessage().contains("Failed to parse PDF") || ex.getMessage().contains("not a valid PDF"),
-             "Exception message should indicate PDF parsing error. Actual: " + ex.getMessage());
+        if(ex.getMessage() != null) {
+            // The actual message from PdfTextFileReader's IOException catch block
+            assertTrue(ex.getMessage().startsWith("Error reading PDF file:") && ex.getMessage().contains("Ensure it's not encrypted or provide password in options."),
+             "Exception message should indicate issues reading/parsing the PDF. Actual: " + ex.getMessage());
+        } else {
+            fail("Exception message was null, but expected a message indicating PDF read/parse error.");
         }
     }
 
@@ -99,10 +102,10 @@ class PdfTextFileReaderTests {
                 contentStream.showText("Encrypted content");
                 contentStream.endText();
             }
-            // Encrypt with an empty user password and owner password "ownerpass"
+            // Encrypt with a non-empty user password and owner password "ownerpass"
             org.apache.pdfbox.pdmodel.encryption.AccessPermission ap = new org.apache.pdfbox.pdmodel.encryption.AccessPermission();
             org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy spp =
-                new org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy("ownerpass", "", ap);
+                new org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy("ownerpass", "userpass", ap); // Set user password
             spp.setEncryptionKeyLength(128);
             document.protect(spp);
             document.save(encryptedPdf.toFile());

@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects; // Added import
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream; // Added import
 
 /**
  * An abstract base class for implementing {@link Toolkit}.
@@ -74,12 +76,16 @@ public abstract class AbstractToolkitBase implements Toolkit {
         if (allTools == null) {
             return Collections.emptyList();
         }
-        if (excludedToolClasses.isEmpty()) {
-            return Collections.unmodifiableList(new ArrayList<>(allTools)); // Return copy or unmodifiable view
+
+        // Always filter out null tools first
+        Stream<Tool> stream = allTools.stream().filter(Objects::nonNull);
+
+        // Then apply exclusions if any
+        if (!excludedToolClasses.isEmpty()) {
+            stream = stream.filter(tool -> !excludedToolClasses.contains(tool.getClass().getName()));
         }
-        return allTools.stream()
-                .filter(tool -> tool != null && !excludedToolClasses.contains(tool.getClass().getName()))
-                .collect(Collectors.toUnmodifiableList());
+
+        return stream.collect(Collectors.toUnmodifiableList());
     }
 
     /**

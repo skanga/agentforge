@@ -28,11 +28,11 @@ class AbstractEmbeddingProviderTests {
 
         @Override
         public List<Double> embedText(String text) throws EmbeddingException {
+            this.embedTextCallCount++; // Increment at the start
             Objects.requireNonNull(text, "Text cannot be null in test implementation of embedText.");
             if (text.contains("throw_exception")) {
                 throw new EmbeddingException("Test embedding failure for: " + text);
             }
-            this.embedTextCallCount++;
             this.lastTextPassedToEmbedText = text;
             return nextEmbeddingToReturn;
         }
@@ -71,11 +71,17 @@ class AbstractEmbeddingProviderTests {
 
     @Test
     void embedDocument_nullContent_throwsEmbeddingException() {
-        testDocument.setContent(null);
+        // To test the provider's handling of a Document that *reports* null content,
+        // without being blocked by Document.setContent's own validation, we mock Document.
+        Document mockDocWithNullContent = mock(Document.class);
+        when(mockDocWithNullContent.getContent()).thenReturn(null);
+        when(mockDocWithNullContent.getId()).thenReturn("mockDocWithNullContentId"); // For exception message
+
         EmbeddingException ex = assertThrows(EmbeddingException.class, () -> {
-            testableProvider.embedDocument(testDocument);
+            testableProvider.embedDocument(mockDocWithNullContent);
         });
         assertTrue(ex.getMessage().contains("Document content cannot be null or empty"));
+        assertTrue(ex.getMessage().contains("mockDocWithNullContentId"));
     }
 
     @Test

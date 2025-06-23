@@ -46,6 +46,7 @@ public class AnthropicProvider implements AIProvider {
     private final AtomicReference<AnthropicStreamMessageUsage> accumulatedStreamUsage = new AtomicReference<>();
 
     private String systemPrompt;
+    private HttpClient httpClient; // Added field
 
     public AnthropicProvider(String apiKey, String model, Map<String, Object> parameters, String baseUri) {
         this.apiKey = Objects.requireNonNull(apiKey, "API key cannot be null");
@@ -93,8 +94,22 @@ public class AnthropicProvider implements AIProvider {
 
     @Override
     public AIProvider setHttpClient(Object client) {
-        // JDK HttpClient doesn't need to be set externally
+        if (client instanceof HttpClient) {
+            this.httpClient = (HttpClient) client;
+        } else if (client == null) {
+            this.httpClient = HttpClientManager.getSharedClient(); // Reset to default or handle error
+        } else {
+            throw new IllegalArgumentException("Client must be an instance of java.net.http.HttpClient");
+        }
         return this;
+    }
+
+    // Ensure httpClient is initialized if not set via setter (e.g. in constructor)
+    private HttpClient getClient() {
+        if (this.httpClient == null) {
+            this.httpClient = HttpClientManager.getSharedClient();
+        }
+        return this.httpClient;
     }
 
     private List<Map<String, Object>> generateToolsPayload(List<com.skanga.tools.Tool> tools) {
@@ -158,7 +173,7 @@ public class AnthropicProvider implements AIProvider {
                     .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                     .build();
 
-                HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200) {
                     throw new ProviderException("Anthropic API request failed", response.statusCode(), response.body());
@@ -279,7 +294,7 @@ public class AnthropicProvider implements AIProvider {
                 .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                 .build();
 
-            HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ProviderException("Anthropic stream request failed", response.statusCode(), response.body());
@@ -405,7 +420,7 @@ public class AnthropicProvider implements AIProvider {
                 .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                 .build();
 
-            HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = getClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ProviderException("Anthropic structured output request failed", response.statusCode(), response.body());

@@ -79,7 +79,7 @@ class SimilaritySearchUtilsTests {
         VectorStoreException ex = assertThrows(VectorStoreException.class, () -> {
             SimilaritySearchUtils.cosineDistance(v1, v2);
         });
-        assertTrue(ex.getMessage().contains("Vectors must have the same length"));
+        assertTrue(ex.getMessage().contains("Vectors must have the same dimension"));
     }
 
     @Test

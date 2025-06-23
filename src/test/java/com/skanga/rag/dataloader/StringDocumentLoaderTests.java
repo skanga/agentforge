@@ -46,9 +46,10 @@ class StringDocumentLoaderTests {
         // Default DelimiterTextSplitter(1500, "\n\n", 100) should split this into two
         List<Document> documents = loader.getDocuments();
 
-        assertEquals(2, documents.size(), "Should be split into two documents by default splitter on '\\n\\n'");
-        assertEquals("Line one.", documents.get(0).getContent());
-        assertEquals("Line two.", documents.get(1).getContent());
+        // The default DelimiterTextSplitter(1500, "\n\n", 100) will combine these short lines
+        // as they, together with the separator, fit within maxLength.
+        assertEquals(1, documents.size(), "Should be combined into one document as it's shorter than maxLength");
+        assertEquals("Line one.\n\nLine two.", documents.get(0).getContent());
 
         for(Document doc : documents) {
             assertEquals("string", doc.getSourceType());

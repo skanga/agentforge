@@ -317,7 +317,7 @@ class BaseToolTests {
 
         ToolCallableException ex = assertThrows(ToolCallableException.class, () -> tool.executeCallable());
         assertEquals(cause, ex.getCause());
-        assertTrue(ex.getMessage().contains("Error executing tool 'testTool'"));
+        assertTrue(ex.getMessage().contains("Error executing tool 'test_tool'")); // Corrected tool name
         assertNull(tool.getResult(), "Result should be cleared on execution failure.");
     }
 
@@ -352,8 +352,8 @@ class BaseToolTests {
         tool.addParameter("param", PropertyType.STRING, "A param", true);
         Map<String, Object> map = tool.toJsonSerializableMap();
 
-        assertEquals("testTool", map.get("name"));
-        assertEquals("A tool for testing.", map.get("description"));
+        assertEquals("test_tool", map.get("name")); // Corrected tool name
+        assertEquals("A test tool for unit testing", map.get("description")); // Corrected description
         assertTrue(map.containsKey("parameters_schema"));
 
         @SuppressWarnings("unchecked")

@@ -38,16 +38,23 @@ public class OllamaProvider implements AIProvider {
     private static final ObjectMapper jsonObjectMapper = ProviderUtils.getObjectMapper();
     final AtomicInteger streamPromptEvalCount = new AtomicInteger(0);
     final AtomicInteger streamEvalCount = new AtomicInteger(0);
+    private final HttpClient httpClient;
 
     private String systemPromptText;
 
-    public OllamaProvider(String baseUrl, String modelName, Map<String, Object> parameters) {
+    public OllamaProvider(String baseUrl, String modelName, Map<String, Object> parameters, HttpClient httpClient) {
         this.baseUrl = baseUrl.endsWith("/api") ? baseUrl.substring(0, baseUrl.length() - 4) :
             (baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl);
         this.modelName = Objects.requireNonNull(modelName, "Model name cannot be null");
         this.parameters = parameters != null ? new HashMap<>(parameters) : new HashMap<>();
         this.messageMapper = new OllamaMessageMapper();
+        this.httpClient = Objects.requireNonNull(httpClient, "HttpClient cannot be null.");
     }
+
+    public OllamaProvider(String baseUrl, String modelName, Map<String, Object> parameters) {
+        this(baseUrl, modelName, parameters, HttpClientManager.getSharedClient());
+    }
+
 
     @Override
     public AIProvider systemPrompt(String prompt) {
@@ -78,7 +85,17 @@ public class OllamaProvider implements AIProvider {
 
     @Override
     public AIProvider setHttpClient(Object client) {
-        // JDK HttpClient doesn't need external setting
+        // This provider now uses constructor injection primarily.
+        // However, to maintain compatibility or for specific use cases,
+        // this method could be updated if direct replacement post-construction is needed.
+        // For now, it's a no-op as tests will use constructor injection.
+        if (client instanceof HttpClient) {
+            // This would require the httpClient field to be non-final,
+            // or use a different mechanism if post-construction change is truly desired.
+            // For testability via constructor injection, this method is less critical.
+            // this.httpClient = (HttpClient) client; // If field were non-final
+            System.err.println("OllamaProvider: HttpClient should be set via constructor for testability. Set via setHttpClient is currently ignored if already set.");
+        }
         return this;
     }
 
@@ -169,7 +186,7 @@ public class OllamaProvider implements AIProvider {
                     .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                     .build();
 
-                HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200) {
                     throw new ProviderException("Ollama API request failed", response.statusCode(), response.body());
@@ -223,6 +240,9 @@ public class OllamaProvider implements AIProvider {
                 return resultMessage;
 
             } catch (Exception e) {
+                if (e instanceof ProviderException) {
+                    throw (ProviderException) e;
+                }
                 throw new ProviderException("Error during Ollama API call: " + e.getMessage(), e);
             }
         });
@@ -302,6 +322,9 @@ public class OllamaProvider implements AIProvider {
             return parseOllamaStream(response.body());
 
         } catch (Exception e) {
+            if (e instanceof ProviderException) {
+                throw (ProviderException) e;
+            }
             throw new ProviderException("Error setting up Ollama stream: " + e.getMessage(), e);
         }
     }
@@ -385,7 +408,7 @@ public class OllamaProvider implements AIProvider {
                 .POST(HttpRequest.BodyPublishers.ofString(payloadJson))
                 .build();
 
-            HttpResponse<String> response = HttpClientManager.getSharedClient().send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ProviderException("Ollama structured output request failed", response.statusCode(), response.body());
@@ -408,7 +431,11 @@ public class OllamaProvider implements AIProvider {
                     responseClass.getName() + "'. Content: " + jsonContentString, jsonEx, response.statusCode(), jsonContentString);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) { // Catch generic Exception
+            if (e instanceof ProviderException) {
+                throw (ProviderException) e;
+            }
+            // Wrap other exceptions (like IOException, InterruptedException)
             throw new ProviderException("Error during Ollama structured output: " + e.getMessage(), e);
         }
     }

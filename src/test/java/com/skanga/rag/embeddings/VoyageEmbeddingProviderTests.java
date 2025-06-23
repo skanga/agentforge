@@ -1,34 +1,67 @@
 package com.skanga.rag.embeddings;
 
+import com.fasterxml.jackson.databind.ObjectMapper; // Added
+import org.junit.jupiter.api.BeforeEach; // Added
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith; // Added
+import org.mockito.Mock; // Added
+import org.mockito.junit.jupiter.MockitoExtension; // Added
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any; // Added
+import static org.mockito.ArgumentMatchers.eq; // Added
+import static org.mockito.Mockito.when; // Added
+
+import java.io.IOException; // Added
+import java.net.http.HttpClient; // Added
+import java.net.http.HttpRequest; // Added
+import java.net.http.HttpResponse; // Added
 import java.util.List;
 
+
+@ExtendWith(MockitoExtension.class) // Added
 class VoyageEmbeddingProviderTests {
 
-    private final String testApiKey = "vy-testapikey"; // Voyage API Key
-    private final String testModel = "voyage-2"; // Example model
+    private final String testApiKey = "vy-testapikey";
+    private final String testModel = "voyage-2";
+    private VoyageEmbeddingProvider provider;
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Mock
+    private HttpClient mockHttpClient;
+    @Mock
+    private HttpResponse<String> mockHttpResponse;
+
+    @BeforeEach
+    void setUp() {
+        provider = new VoyageEmbeddingProvider(testApiKey, testModel, mockHttpClient);
+    }
 
     @Test
     void constructor_validArgs_initializes() {
-        VoyageEmbeddingProvider provider = new VoyageEmbeddingProvider(testApiKey, testModel);
+        // provider is initialized in setUp with mockHttpClient
         assertNotNull(provider);
-        // Further checks on internal fields would require them to be accessible or tested via behavior.
     }
 
     @Test
     void constructor_nullApiKey_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new VoyageEmbeddingProvider(null, testModel));
+        assertThrows(NullPointerException.class, () -> new VoyageEmbeddingProvider(null, testModel, mockHttpClient));
     }
 
     @Test
     void constructor_nullModelName_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new VoyageEmbeddingProvider(testApiKey, null));
+        assertThrows(NullPointerException.class, () -> new VoyageEmbeddingProvider(testApiKey, null, mockHttpClient));
     }
 
     @Test
+    void constructor_nullHttpClient_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new VoyageEmbeddingProvider(testApiKey, testModel, null));
+    }
+
+
+    @Test
     void embedText_emptyText_throwsEmbeddingException() {
-        VoyageEmbeddingProvider provider = new VoyageEmbeddingProvider(testApiKey, testModel);
+        // VoyageEmbeddingProvider provider = new VoyageEmbeddingProvider(testApiKey, testModel); // Uses provider from setUp
         Exception exception = assertThrows(EmbeddingException.class, () -> {
             provider.embedText("");
         });
@@ -42,25 +75,45 @@ class VoyageEmbeddingProviderTests {
 
     @Test
     void embedText_nullText_throwsNullPointerException() {
-        VoyageEmbeddingProvider provider = new VoyageEmbeddingProvider(testApiKey, testModel);
+        // VoyageEmbeddingProvider provider = new VoyageEmbeddingProvider(testApiKey, testModel); // Uses provider from setUp
         assertThrows(NullPointerException.class, () -> provider.embedText(null));
     }
 
     @Test
-    void embedText_skeletonImplementation_returnsEmptyListOrThrows() {
-        VoyageEmbeddingProvider provider = new VoyageEmbeddingProvider(testApiKey, testModel);
-        String sampleText = "This is a test for the skeleton Voyage embedder.";
+    void embedText_successfulApiCall_returnsEmbedding() throws IOException, InterruptedException {
+        String sampleText = "This is a test for Voyage embedder.";
+        List<Double> expectedEmbedding = List.of(0.1, 0.2, 0.3);
+        VoyageEmbeddingProvider.VoyageEmbeddingData embeddingData = new VoyageEmbeddingProvider.VoyageEmbeddingData("embedding", expectedEmbedding, 0);
+        VoyageEmbeddingProvider.VoyageEmbeddingResponse mockApiResponse = new VoyageEmbeddingProvider.VoyageEmbeddingResponse("list", List.of(embeddingData), testModel, new VoyageEmbeddingProvider.VoyageUsage(5));
+        String responseJson = objectMapper.writeValueAsString(mockApiResponse);
 
-        // Current skeleton returns empty list and prints to System.err
-        // If it were to throw UnsupportedOperationException, that would be tested here.
+        when(mockHttpResponse.statusCode()).thenReturn(200);
+        when(mockHttpResponse.body()).thenReturn(responseJson);
+        when(mockHttpClient.send(any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString())))
+                .thenReturn(mockHttpResponse);
+
         List<Double> result = provider.embedText(sampleText);
         assertNotNull(result);
-        assertTrue(result.isEmpty(), "Skeleton implementation should return an empty list.");
+        assertEquals(expectedEmbedding, result);
+    }
 
-        // To test for UnsupportedOperationException if that was the skeleton's behavior:
-        // assertThrows(UnsupportedOperationException.class, () -> {
-        //     provider.embedText(sampleText);
-        // });
+    @Test
+    void embedText_apiReturnsError_throwsEmbeddingException() throws IOException, InterruptedException {
+        String sampleText = "This text will cause an API error.";
+        String errorJson = "{\"detail\":\"Invalid API key\"}";
+
+        when(mockHttpResponse.statusCode()).thenReturn(401);
+        when(mockHttpResponse.body()).thenReturn(errorJson);
+        when(mockHttpClient.send(any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofString())))
+                .thenReturn(mockHttpResponse);
+
+        EmbeddingException ex = assertThrows(EmbeddingException.class, () -> {
+            provider.embedText(sampleText);
+        });
+
+        assertTrue(ex.getMessage().contains("Voyage AI API request for embedding failed"));
+        assertEquals(401, ex.getStatusCode());
+        assertEquals(errorJson, ex.getErrorBody());
     }
 
     // When VoyageEmbeddingProvider is fully implemented, add tests similar to OpenAI/Ollama:

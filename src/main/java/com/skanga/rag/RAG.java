@@ -250,7 +250,7 @@ public class RAG extends BaseAgent {
             newContextContent.append("--- Relevant Information Start ---\n");
             for (Document doc : documents) {
                 newContextContent.append("Source (").append(doc.getSourceName() != null ? doc.getSourceName() : "N/A").append("):\n");
-                newContextContent.append(doc.getContent()).append("\n");
+                newContextContent.append("Content: ").append(doc.getContent()).append("\n"); // Added "Content: " prefix
                 newContextContent.append("---\n");
             }
             newContextContent.append("--- Relevant Information End ---\n");
@@ -258,10 +258,9 @@ public class RAG extends BaseAgent {
         }
 
         String newInstructions = contextFreeInstructions + newContextContent.toString();
-        // Notify about instruction change if it actually changed
-        if (!Objects.equals(originalInstructions, newInstructions)) {
-             notifyObservers("instructions-changed", new com.skanga.observability.events.InstructionsChanged(originalInstructions, newInstructions, Map.of("reason", "RAG document context update")));
-        }
+        // The super.withInstructions call will notify if there's an actual change to the base agent's instructions.
+        // The reason for the change (RAG context update) can be inferred by the calling method or a more specific event.
+        // For now, rely on BaseAgent's notification.
         super.withInstructions(newInstructions.trim());
         return this;
     }
@@ -313,9 +312,19 @@ public class RAG extends BaseAgent {
         searchEventData.put("top_k", this.topK);
         notifyObservers("rag-vectorstore-searching", searchEventData);
         long searchStartTime = System.currentTimeMillis();
+        List<Document> retrievedDocs;
+        long searchDurationMs;
 
-        List<Document> retrievedDocs = getVectorStore().similaritySearch(queryEmbedding, this.topK); // Throws if provider not set
-        long searchDurationMs = System.currentTimeMillis() - searchStartTime;
+        try {
+            retrievedDocs = getVectorStore().similaritySearch(queryEmbedding, this.topK); // Throws if provider not set
+            searchDurationMs = System.currentTimeMillis() - searchStartTime;
+        } catch (RuntimeException e) {
+            searchDurationMs = System.currentTimeMillis() - searchStartTime;
+            notifyObservers("rag-vectorstore-result", new com.skanga.observability.events.VectorStoreResult(
+                getVectorStore().getClass().getSimpleName(), question, Collections.emptyList(), searchDurationMs
+            ));
+            throw new AgentException("Failed to retrieve documents from vector store: " + e.getMessage(), e);
+        }
 
         // Deduplication: Using content hash to remove exact duplicates.
         // LinkedHashSet preserves insertion order of unique elements.

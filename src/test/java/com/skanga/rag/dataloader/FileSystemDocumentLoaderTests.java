@@ -158,9 +158,9 @@ class FileSystemDocumentLoaderTests {
         Map<String, FileReader> customReaders = Map.of("bad", errorReader);
         loader = new FileSystemDocumentLoader(testFile, false, customReaders, null, mockSplitter);
 
-        DocumentLoaderException ex = assertThrows(DocumentLoaderException.class, () -> loader.getDocuments());
-        assertTrue(ex.getMessage().contains("Failed to load document from file"));
-        assertTrue(ex.getCause() instanceof IOException);
+        // For single file load, IOException from reader.getText() propagates directly
+        IOException ex = assertThrows(IOException.class, () -> loader.getDocuments());
+        assertTrue(ex.getMessage().contains("Simulated read error"));
     }
 
     @Test

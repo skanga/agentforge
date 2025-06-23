@@ -101,6 +101,9 @@ class AbstractDocumentLoaderTests {
         when(mockSplitter.splitDocument(any(Document.class))).thenReturn(splitDocs);
         stringLoader = new StringDocumentLoader("Raw long content...");
         stringLoader.withTextSplitter(mockSplitter);
+
+        clearInvocations(mockSplitter); // Diagnostic: ensure clean slate before action
+
         finalDocs = stringLoader.getDocuments();
 
         assertEquals(2, finalDocs.size());
